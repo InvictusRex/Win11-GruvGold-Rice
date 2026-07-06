@@ -1,0 +1,38 @@
+{
+  "name": "GruvGold",
+  "description": "Gruvbox Dark forced to a pure-black base, gold accent. Extracted from references/obsidian_rice.png.",
+  "core": {
+    "bg":       "#000000",
+    "bg_alt":   "#0D0C09",
+    "bg_elev":  "#16130D",
+    "border":   "#282421",
+    "fg":       "#FBF1C7",
+    "fg_dim":   "#BDAE93",
+    "fg_muted": "#7C6F64",
+    "gold":     "#D5AC45",
+    "gold_dim": "#D1A433"
+  },
+  "ramp": {
+    "black":   "#000000",
+    "red":     "#CC241D",
+    "green":   "#98971A",
+    "yellow":  "#D79921",
+    "blue":    "#458588",
+    "purple":  "#B16286",
+    "aqua":    "#689D6A",
+    "white":   "#BDAE93",
+    "brblack": "#665C54",
+    "brred":   "#FB4934",
+    "brgreen": "#B8BB26",
+    "bryellow":"#FABD2F",
+    "brblue":  "#83A598",
+    "brpurple":"#D3869B",
+    "braqua":  "#8EC07C",
+    "brwhite": "#FBF1C7",
+    "orange":  "#FE8019"
+  },
+  "font": {
+    "ui":   "Segoe UI Variable",
+    "mono": "JetBrainsMono NF"
+  }
+}

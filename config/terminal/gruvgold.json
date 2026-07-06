@@ -1,0 +1,32 @@
+{
+  "$help": "Windows Terminal fragment - adds the GruvGold colour scheme without touching your settings.json. Installed to %LOCALAPPDATA%\\Microsoft\\Windows Terminal\\Fragments\\GruvGold\\gruvgold.json",
+  "schemes": [
+    {
+      "name": "GruvGold",
+
+      "background": "#000000",
+      "foreground": "#FBF1C7",
+
+      "cursorColor": "#D5AC45",
+      "selectionBackground": "#282421",
+
+      "black": "#000000",
+      "red": "#CC241D",
+      "green": "#98971A",
+      "yellow": "#D79921",
+      "blue": "#458588",
+      "purple": "#B16286",
+      "cyan": "#689D6A",
+      "white": "#BDAE93",
+
+      "brightBlack": "#665C54",
+      "brightRed": "#FB4934",
+      "brightGreen": "#B8BB26",
+      "brightYellow": "#FABD2F",
+      "brightBlue": "#83A598",
+      "brightPurple": "#D3869B",
+      "brightCyan": "#8EC07C",
+      "brightWhite": "#FBF1C7"
+    }
+  ]
+}
