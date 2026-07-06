@@ -1,0 +1,12 @@
+okay so this is what i want, 
+the obsidian_rice.png image is the rice which im using for my obsidian, i want exactly the same aesthetic wise, the same wallpaper is there as wallpaper.png in the same directory
+for the launcher, look at launcher_reference.png, something like this
+like, when at desktop, if i begin to type something it should automatically bring up the launcher and either open apps or search in google (similar to how its like in reference_1.png)
+i want the top bar to be exactly like reference_1, refernce_2, reference_3
+the terminals and other windows like terminal_reference.png, and the other refernce_1, 2, 3 images, a bit translucent, mostly black and so on
+i want the bottom bar to be like reference_2 image, where i can pin some apps and so on
+the bottom bar should show the windows tray and other notif things like in reference_2 image
+the color palette to be like the obsidian_rice.png
+and lock screen options something like reference_4, like its usually like in hyprland rices
+so like, a lot like the reference images 1, 2, 3, 4 but with above mentioned features from the other reference images. 
+tell me this, what all things need to be done to do this? will this break windows functionality? tell me how can we achieve this exact aesthetics and functionality im going for but without breaking or bricking things.
