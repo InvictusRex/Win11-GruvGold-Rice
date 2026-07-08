@@ -1,0 +1,258 @@
+﻿<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:system="clr-namespace:System;assembly=mscorlib">
+
+    <!--  GruvGold - Gruvbox Dark on pure black with a gold accent.
+          Palette matches references/obsidian_rice.png; see palette.json.
+            bg_alt #0D0C09   bg_elev #16130D   border #282421
+            fg     #FBF1C7   fg_dim  #BDAE93   fg_muted #7C6F64
+            gold   #D5AC45                                                -->
+
+    <ResourceDictionary.MergedDictionaries>
+        <ResourceDictionary Source="pack://application:,,,/Themes/Base.xaml" />
+    </ResourceDictionary.MergedDictionaries>
+
+    <!--  geometry
+          Types here must match Base.xaml exactly. ImageAreaWidth and WindowRadius
+          are Styles (targeting ColumnDefinition and Border), NOT a Double and a
+          CornerRadius - declaring them as values throws
+          "Add value to collection of type 'ColumnDefinitionCollection'" at load
+          time and Flow Launcher's window then never constructs.  -->
+    <Style x:Key="ImageAreaWidth" TargetType="{x:Type ColumnDefinition}">
+        <Setter Property="Width" Value="46" />
+    </Style>
+    <Style x:Key="WindowRadius" TargetType="{x:Type Border}">
+        <Setter Property="CornerRadius" Value="10" />
+    </Style>
+
+    <system:Double x:Key="ResultItemHeight">46</system:Double>
+    <CornerRadius x:Key="ItemRadius">6</CornerRadius>
+    <Thickness x:Key="ItemMargin">8 0 8 0</Thickness>
+    <Thickness x:Key="ResultMargin">0 0 0 8</Thickness>
+
+    <!--  window  -->
+    <Style
+        x:Key="WindowBorderStyle"
+        BasedOn="{StaticResource BaseWindowBorderStyle}"
+        TargetType="{x:Type Border}">
+        <Setter Property="Background" Value="#0D0C09" />
+        <Setter Property="BorderBrush" Value="#282421" />
+        <Setter Property="BorderThickness" Value="1" />
+    </Style>
+
+    <Style
+        x:Key="WindowStyle"
+        BasedOn="{StaticResource BaseWindowStyle}"
+        TargetType="{x:Type Window}" />
+
+    <!--  query box  -->
+    <Style
+        x:Key="QueryBoxStyle"
+        BasedOn="{StaticResource BaseQueryBoxStyle}"
+        TargetType="{x:Type TextBox}">
+        <Setter Property="Foreground" Value="#FBF1C7" />
+        <Setter Property="CaretBrush" Value="#D5AC45" />
+        <Setter Property="SelectionBrush" Value="#D5AC45" />
+        <Setter Property="FontSize" Value="19" />
+        <Setter Property="Padding" Value="4 0 0 0" />
+    </Style>
+
+    <Style
+        x:Key="QueryBoxBgStyle"
+        BasedOn="{StaticResource BaseQueryBoxBgStyle}"
+        TargetType="{x:Type Border}">
+        <Setter Property="Background" Value="Transparent" />
+    </Style>
+
+    <!--  the inline autocomplete ghost text  -->
+    <Style
+        x:Key="QuerySuggestionBoxStyle"
+        BasedOn="{StaticResource BaseQuerySuggestionBoxStyle}"
+        TargetType="{x:Type TextBox}">
+        <Setter Property="Foreground" Value="#665C54" />
+        <Setter Property="FontSize" Value="19" />
+        <Setter Property="Padding" Value="4 0 0 0" />
+    </Style>
+
+    <Style
+        x:Key="SearchIconStyle"
+        BasedOn="{StaticResource BaseSearchIconStyle}"
+        TargetType="{x:Type Path}">
+        <Setter Property="Fill" Value="#7C6F64" />
+    </Style>
+
+    <!--  results  -->
+    <Style
+        x:Key="ItemTitleStyle"
+        BasedOn="{StaticResource BaseItemTitleStyle}"
+        TargetType="{x:Type TextBlock}">
+        <Setter Property="Foreground" Value="#BDAE93" />
+        <Setter Property="FontSize" Value="14" />
+    </Style>
+
+    <Style
+        x:Key="ItemSubTitleStyle"
+        BasedOn="{StaticResource BaseItemSubTitleStyle}"
+        TargetType="{x:Type TextBlock}">
+        <Setter Property="Foreground" Value="#665C54" />
+        <Setter Property="FontSize" Value="11" />
+    </Style>
+
+    <Style
+        x:Key="ItemTitleSelectedStyle"
+        BasedOn="{StaticResource BaseItemTitleSelectedStyle}"
+        TargetType="{x:Type TextBlock}">
+        <Setter Property="Foreground" Value="#FBF1C7" />
+        <Setter Property="FontSize" Value="14" />
+        <Setter Property="Cursor" Value="Arrow" />
+    </Style>
+
+    <Style
+        x:Key="ItemSubTitleSelectedStyle"
+        BasedOn="{StaticResource BaseItemSubTitleSelectedStyle}"
+        TargetType="{x:Type TextBlock}">
+        <Setter Property="Foreground" Value="#BDAE93" />
+        <Setter Property="FontSize" Value="11" />
+        <Setter Property="Cursor" Value="Arrow" />
+    </Style>
+
+    <!--  the characters that matched the query
+          Untyped Style, so setters must be qualified with the element type Flow
+          applies it to. Base.xaml uses Inline.* - match that.  -->
+    <Style x:Key="HighlightStyle">
+        <Setter Property="Inline.Foreground" Value="#D5AC45" />
+        <Setter Property="Inline.FontWeight" Value="Bold" />
+    </Style>
+
+    <SolidColorBrush x:Key="ItemSelectedBackgroundColor">#16130D</SolidColorBrush>
+
+    <Style
+        x:Key="ItemImageSelectedStyle"
+        BasedOn="{StaticResource BaseItemImageSelectedStyle}"
+        TargetType="{x:Type Image}">
+        <Setter Property="Cursor" Value="Arrow" />
+    </Style>
+
+    <Style
+        x:Key="ItemGlyph"
+        BasedOn="{StaticResource BaseGlyphStyle}"
+        TargetType="{x:Type TextBlock}">
+        <Setter Property="Foreground" Value="#BDAE93" />
+    </Style>
+
+    <Style
+        x:Key="ItemGlyphSelectedStyle"
+        BasedOn="{StaticResource BaseGlyphSelectedStyle}"
+        TargetType="{x:Type TextBlock}">
+        <Setter Property="Foreground" Value="#D5AC45" />
+    </Style>
+
+    <!--  the "Alt+1" chips on the right of a row  -->
+    <Style
+        x:Key="ItemHotkeyStyle"
+        BasedOn="{StaticResource BaseItemHotkeyStyle}"
+        TargetType="{x:Type TextBlock}">
+        <Setter Property="Foreground" Value="#665C54" />
+        <Setter Property="FontSize" Value="11" />
+    </Style>
+
+    <Style
+        x:Key="ItemHotkeySelectedStyle"
+        BasedOn="{StaticResource BaseItemHotkeySelectedStyle}"
+        TargetType="{x:Type TextBlock}">
+        <Setter Property="Foreground" Value="#BDAE93" />
+        <Setter Property="FontSize" Value="11" />
+    </Style>
+
+    <Style
+        x:Key="ItemHotkeyBGStyle"
+        BasedOn="{StaticResource BaseItemHotkeyBGStyle}"
+        TargetType="{x:Type Border}">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderBrush" Value="#282421" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="4" />
+    </Style>
+
+    <Style
+        x:Key="ItemHotkeyBGSelectedStyle"
+        BasedOn="{StaticResource BaseItemHotkeyBGSelectedStyle}"
+        TargetType="{x:Type Border}">
+        <Setter Property="Background" Value="#0D0C09" />
+        <Setter Property="BorderBrush" Value="#D5AC45" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="4" />
+    </Style>
+
+    <!--  chrome  -->
+    <Style
+        x:Key="SeparatorStyle"
+        BasedOn="{StaticResource BaseSeparatorStyle}"
+        TargetType="{x:Type Rectangle}">
+        <Setter Property="Fill" Value="#282421" />
+        <Setter Property="Height" Value="1" />
+        <Setter Property="Margin" Value="10 0 10 6" />
+    </Style>
+
+    <Style
+        x:Key="PendingLineStyle"
+        BasedOn="{StaticResource BasePendingLineStyle}"
+        TargetType="{x:Type Line}">
+        <Setter Property="Stroke" Value="#D5AC45" />
+    </Style>
+
+    <Style
+        x:Key="ThumbStyle"
+        BasedOn="{StaticResource BaseThumbStyle}"
+        TargetType="{x:Type Thumb}" />
+
+    <Style
+        x:Key="ScrollBarStyle"
+        BasedOn="{StaticResource BaseScrollBarStyle}"
+        TargetType="{x:Type ScrollBar}" />
+
+    <!--  preview pane  -->
+    <Style
+        x:Key="PreviewBorderStyle"
+        BasedOn="{StaticResource BasePreviewBorderStyle}"
+        TargetType="{x:Type Border}">
+        <Setter Property="BorderBrush" Value="#282421" />
+    </Style>
+
+    <Style
+        x:Key="PreviewItemTitleStyle"
+        BasedOn="{StaticResource BasePreviewItemTitleStyle}"
+        TargetType="{x:Type TextBlock}">
+        <Setter Property="Foreground" Value="#FBF1C7" />
+    </Style>
+
+    <Style
+        x:Key="PreviewItemSubTitleStyle"
+        BasedOn="{StaticResource BasePreviewItemSubTitleStyle}"
+        TargetType="{x:Type TextBlock}">
+        <Setter Property="Foreground" Value="#7C6F64" />
+    </Style>
+
+    <Style
+        x:Key="PreviewGlyph"
+        BasedOn="{StaticResource BasePreviewGlyph}"
+        TargetType="{x:Type TextBlock}">
+        <Setter Property="Foreground" Value="#BDAE93" />
+    </Style>
+
+    <!--  optional clock shown under the query box  -->
+    <Style
+        x:Key="ClockBox"
+        BasedOn="{StaticResource BaseClockBox}"
+        TargetType="{x:Type TextBlock}">
+        <Setter Property="Foreground" Value="#7C6F64" />
+    </Style>
+
+    <Style
+        x:Key="DateBox"
+        BasedOn="{StaticResource BaseDateBox}"
+        TargetType="{x:Type TextBlock}">
+        <Setter Property="Foreground" Value="#665C54" />
+    </Style>
+</ResourceDictionary>
