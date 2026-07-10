@@ -1,0 +1,348 @@
+# YASB - GruvGold
+#
+# The bottom bar in reference_2.png is the NATIVE Windows taskbar made transparent
+# by TranslucentTB, not a YASB bar - that is why the tray and notification bell
+# still work. This config deliberately does NOT use YASB's systray/taskbar widgets:
+# two trays competing for the same "TaskbarCreated" broadcast is a known upstream
+# conflict (amnweb/yasb#324).
+#
+# ---------------------------------------------------------------------------
+# SIZES AND DISPLAY SCALING
+# ---------------------------------------------------------------------------
+# Every size here and in styles.css is in LOGICAL pixels; Qt multiplies them by
+# the display scale when it paints. Measured on this machine (150%, 1707x1067
+# logical / 2560x1600 physical): a 40px bar paints 60px tall and the layout
+# spans the full 2560, so the three regions land where they should with no
+# correction. Earlier revisions carried invisible "strut" spacers to drag the
+# centre and right groups back on screen - they are no longer needed and were
+# removed; re-measure before adding anything like them back.
+
+bars:
+  gruvgold-bar:
+    enabled: true
+    screens: ['*']
+    class_name: "yasb-bar"
+    alignment:
+      position: "top"
+      align: "left"
+    blur_effect:
+      enabled: false
+    window_flags:
+      always_on_top: true       # survives Show Desktop (Win+D)
+      # Turning this off so windows could drag to the true screen edge also
+      # made native maximize (title-bar button, double-click, Win+Up/Up) size
+      # to the FULL monitor, running under the bar - worse than the problem it
+      # solved. Snap Layouts has an appbar-independent trigger anyway: hovering
+      # the window's own maximize button. Reaching the top edge for a tiled
+      # window is instead handled by auto-floating on drag-start (see
+      # desktop-type-to-launch.ahk), not by giving up the reservation.
+      windows_app_bar: true
+      hide_on_fullscreen: true
+    dimensions:
+      width: "100%"
+      height: 40
+    # Padding stays at zero: trimming it also shrinks the WINDOW, and anything
+    # outside the window renders but cannot be clicked (verified - WindowFromPoint
+    # over the power icon returned explorer.exe). The regions place themselves:
+    # `center` lands on the true screen centre, `right` on the right edge.
+    padding: { top: 0, left: 0, bottom: 0, right: 0 }
+    widgets:
+      left:   ["clock", "traffic"]
+      center: ["active_window"]
+      right:  ["media", "wifi", "bluetooth", "battery", "control_center", "recycle_bin", "power_menu"]
+
+widgets:
+  # ================================================================ left group
+  clock:
+    type: "yasb.clock.ClockWidget"
+    options:
+      label: "{%H:%M}"
+      label_alt: "{%a, %d %b %Y}"
+      class_name: "clock-pill"
+      update_interval: 1000
+      timezones: []
+      calendar:
+        blur: true
+        round_corners: true
+        border_color: "#282421"
+        alignment: "left"
+        direction: "down"
+        offset_top: 8
+        show_week_numbers: false
+      callbacks:
+        on_left: "toggle_calendar"
+        on_right: "toggle_label"
+
+  # No pill - this floats directly over the wallpaper.
+  traffic:
+    type: "yasb.traffic.TrafficWidget"
+    options:
+      label: "↓ {download_speed} │ ↑ {upload_speed}"
+      label_alt: "↓ {download_speed} │ ↑ {upload_speed}"
+      class_name: "net-bare"
+      update_interval: 1000
+      hide_if_offline: false
+      # hide_decimal drops the ".4" that flickers every tick. The remaining
+      # width changes (9 -> 10 -> 100) are absorbed by the fixed-width container
+      # in styles.css, which left-aligns the text so only its tail moves and
+      # nothing after it is dragged along. max_label_length is NOT used - it
+      # truncates rather than pads, and ate the download half of the label.
+      hide_decimal: true
+      speed_unit: "bits"
+      callbacks:
+        on_left: "do_nothing"
+        on_middle: "do_nothing"
+        on_right: "do_nothing"
+
+  # ============================================================== centre group
+  active_window:
+    type: "yasb.active_window.ActiveWindowWidget"
+    options:
+      label: "{win[title]}"
+      label_alt: "{win[process][name]}"
+      label_no_window: ""
+      label_icon: false
+      max_length: 40
+      max_length_ellipsis: "…"
+      monitor_exclusive: false
+      class_name: "context-island"
+      callbacks:
+        on_left: "toggle_label"
+
+  # =============================================================== media group
+  # The visualizer bars are embedded directly in this widget (see visualizer:
+  # below) rather than run as a separate widget, so bars + controls + track
+  # label are one continuous pill - see styles.css.
+  media:
+    type: "yasb.media.MediaWidget"
+    options:
+      label: "{title}"
+      label_alt: "{artist} - {title}"
+      class_name: "media-main"
+      max_field_size:
+        label: 26
+        label_alt: 26
+      show_thumbnail: false
+      controls_only: false
+      controls_left: true
+      controls_hide: false
+      hide_empty: true          # nothing playing -> the pill simply goes away
+      visualizer:
+        style: "bars"
+        bars:
+          count: 12
+          width: 2
+          gap: 2
+        height: 12
+        sensitivity: 65
+        smoothness: 3
+        channels: "stereo"
+        mirror: false
+        reverse: false
+        auto_gain: true
+        hide_idle: true
+        hide_idle_after: 3000
+        freq_min: 30
+        freq_max: 14000
+        framerate: 60
+      scrolling_label:
+        enabled: true
+        style: "left"
+        separator: "  •  "
+      icons:
+        prev_track: ""
+        next_track: ""
+        play: ""
+        pause: ""
+      media_menu:
+        blur: true
+        round_corners: true
+        border_color: "#282421"
+        alignment: "right"
+        direction: "down"
+        offset_top: 8
+      callbacks:
+        on_left: "toggle_media_menu"
+        on_right: "toggle_label"
+
+  # ============================================================== system group
+  # Click opens YASB's own network menu - available networks, connect/disconnect.
+  wifi:
+    type: "yasb.wifi.WifiWidget"
+    options:
+      label: "{wifi_icon}"
+      label_alt: "{wifi_icon}"
+      class_name: "sys-wifi"
+      update_interval: 5000
+      # Hovering the icon shows the SSID (or "Disconnected") in a pill below it,
+      # same as bluetooth's tooltip.
+      tooltip: true
+      hide_if_ethernet: false
+      ethernet_icon: "󰈀"
+      ethernet_label: "{ethernet_icon}"
+      ethernet_label_alt: "{ethernet_icon}"
+      wifi_icons:
+        - "󰤯"
+        - "󰤟"
+        - "󰤢"
+        - "󰤥"
+        - "󰤨"
+      menu_config:
+        blur: true
+        round_corners: true
+        border_color: "#282421"
+        alignment: "right"
+        direction: "down"
+        offset_top: 8
+        # Signal strength in the menu rows, padlocked when the network is
+        # secured - the default is a bare padlock at every strength.
+        wifi_icons_secured:
+          - "󰤭"
+          - "󰤡"
+          - "󰤤"
+          - "󰤧"
+          - "󰤪"
+        wifi_icons_unsecured:
+          - "󰤯"
+          - "󰤟"
+          - "󰤢"
+          - "󰤥"
+          - "󰤨"
+      callbacks:
+        on_left: "toggle_menu"
+        on_right: "toggle_label"
+
+  bluetooth:
+    type: "yasb.bluetooth.BluetoothWidget"
+    options:
+      label: "{icon}"
+      label_alt: "{icon}"
+      class_name: "sys-bt"
+      # Hovering the icon shows this in a pill below it (styled as .tooltip in
+      # styles.css). Connected devices replace it with their names.
+      tooltip: true
+      label_no_device: "Disconnected"
+      icons:
+        bluetooth_on: "󰂯"
+        bluetooth_off: "󰂲"
+        bluetooth_connected: "󰂱"
+      menu_config:
+        blur: true
+        round_corners: true
+        border_color: "#282421"
+        alignment: "right"
+        direction: "down"
+        offset_top: 8
+        # The stock icons come from a Nerd Font range JetBrainsMono renders as
+        # tofu; these are the Material Design glyphs used everywhere else here.
+        device_icons:
+          headphones: "󰋋"
+          headset: "󰋎"
+          speaker: "󰓃"
+          phone: "󰄜"
+          tablet: "󰓷"
+          laptop: "󰌢"
+          computer: "󰍹"
+          keyboard: "󰌌"
+          mouse: "󰍽"
+          controller: "󰊴"
+          watch: "󰔠"
+          camera: "󰄀"
+          generic: "󰂯"
+      callbacks:
+        on_left: "toggle_menu"
+  # Icon only. Colour comes from the status-* class YASB sets; see styles.css.
+  battery:
+    type: "yasb.battery.BatteryWidget"
+    options:
+      label: "{icon}"
+      label_alt: "{icon} {percent}% | {time_remaining}"
+      class_name: "sys-battery"
+      update_interval: 10000
+      hide_unsupported: true
+      time_remaining_natural: true
+      time_remaining_unlimited_icon: "Charging"
+      status_thresholds:
+        critical: 10
+        low: 25
+        medium: 60
+        high: 90
+        full: 100
+      status_icons:
+        icon_charging: "󰂄"
+        icon_critical: "󰂃"
+        icon_low:      "󰁺"
+        icon_medium:   "󰁾"
+        icon_high:     "󰂂"
+        icon_full:     "󰁹"
+      charging_options:
+        icon_format: "{charging_icon}"
+        blink_charging_icon: false
+      callbacks:
+        on_left: "toggle_label"       # battery has no tooltip option; click shows detail
+
+  # Quick settings, sitting next to the battery. YASB's battery widget has no
+  # menu of its own, so this carries what the Windows battery flyout offers:
+  # brightness / volume / microphone sliders and the profile + settings
+  # buttons. No power plan/mode (not needed) and no media (the bar already
+  # has a media pill).
+  control_center:
+    type: "yasb.control_center.ControlCenterWidget"
+    options:
+      label: "󰘮"
+      label_alt: "󰘮"
+      class_name: "sys-cc"
+      tooltip: true
+      popup:
+        blur: true
+        round_corners: true
+        border_color: "#282421"
+        alignment: "right"
+        direction: "down"
+        offset_top: 8
+      sections_order: ["system_controls", "sliders"]
+      sections:
+        system_controls:
+          profile_image_size: 36
+          profile_image_path: "E:/OPERA/Windows Rice/references/pfp.jpg"
+      callbacks:
+        on_left: "toggle_menu"
+
+  # `open_bin` opens the real Windows Recycle Bin - this is not a reimplementation.
+  recycle_bin:
+    type: "yasb.recycle_bin.RecycleBinWidget"
+    options:
+      label: "{icon}"
+      label_alt: "{icon}"
+      class_name: "sys-bin"
+      tooltip: true
+      icons:
+        bin_empty:  "󰩺"
+        bin_filled: "󰩹"
+      callbacks:
+        on_left: "open_bin"
+        on_right: "toggle_label"
+
+  # Fullscreen session overlay - reference_4.png. Styling is in styles.css.
+  power_menu:
+    type: "yasb.power_menu.PowerMenuWidget"
+    options:
+      label: ""
+      uptime: true
+      show_user: true
+      blur: false
+      blur_background: true
+      animation_duration: 220
+      button_row: 3
+      profile_image_size: 140
+      profile_image_path: "E:/OPERA/Windows Rice/references/pfp.jpg"
+      menu_style: "fullscreen"
+      buttons:
+        restart:   ["", "Restart"]
+        shutdown:  ["", "Shut Down"]
+        signout:   ["󰍃", "Sign out"]
+        hibernate: ["", "Hibernate"]
+        lock:      ["", "Lock"]
+        cancel:    ["", "Cancel"]
+      callbacks:
+        on_left: "toggle_power_menu"
