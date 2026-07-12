@@ -1,0 +1,93 @@
+{
+  "app_specific_configuration_path": "$Env:USERPROFILE/.config/komorebi/applications.json",
+
+  "window_hiding_behaviour": "Cloak",
+  "cross_monitor_move_behaviour": "Insert",
+  "float_override": false,
+
+  "mouse_follows_focus": false,
+
+  "window_container_behaviour": "Append",
+
+  "default_workspace_padding": 0,
+  "default_container_padding": 0,
+
+  "border": true,
+  "border_width": 1,
+  "border_offset": -1,
+  "border_style": "Square",
+  "border_implementation": "Komorebi",
+  "border_colours": {
+    "single": "#83A598",
+    "stack": "#FABD2F",
+    "monocle": "#FE8019",
+    "floating": "#83A598",
+    "unfocused": "#282421"
+  },
+
+  "transparency": false,
+  "transparency_alpha": 200,
+
+  "animation": {
+    "enabled": true,
+    "duration": 200,
+    "fps": 60
+  },
+
+  "stackbar": {
+    "height": 32,
+    "mode": "Never",
+    "label": "Title",
+    "tabs": {
+      "width": 220,
+      "focused_text": "#FBF1C7",
+      "unfocused_text": "#7C6F64",
+      "background": "#0D0C09",
+      "font_family": "Segoe UI Variable"
+    }
+  },
+
+  "ignore_rules": [
+    { "kind": "Exe", "id": "komorebi.exe", "matching_strategy": "Equals" },
+    { "kind": "Exe", "id": "yasb.exe", "matching_strategy": "Equals" },
+    { "kind": "Exe", "id": "Rainmeter.exe", "matching_strategy": "Equals" },
+    { "kind": "Exe", "id": "Flow.Launcher.exe", "matching_strategy": "Equals" },
+    { "kind": "Exe", "id": "TranslucentTB.exe", "matching_strategy": "Equals" },
+    { "kind": "Exe", "id": "Everything.exe", "matching_strategy": "Equals" },
+    { "kind": "Exe", "id": "RobloxPlayerBeta.exe", "matching_strategy": "Equals" },
+    { "kind": "Exe", "id": "steamwebhelper.exe", "matching_strategy": "Equals" },
+    { "kind": "Exe", "id": "msiexec.exe", "matching_strategy": "Equals" },
+    { "kind": "Class", "id": "#32770", "matching_strategy": "Equals" },
+
+    { "kind": "Class", "id": "MSCTFIME UI", "matching_strategy": "Equals" },
+    { "kind": "Class", "id": "IME", "matching_strategy": "Equals" },
+
+    { "kind": "Path", "id": "C:\\Program Files (x86)\\GOG Galaxy\\GalaxyClient.exe", "matching_strategy": "Equals" },
+    { "kind": "Path", "id": "C:\\Program Files (x86)\\Steam\\Steam.exe", "matching_strategy": "Equals" },
+    { "kind": "Path", "id": "C:\\Program Files (x86)\\Epic Games\\Launcher\\Portal\\Binaries\\Win32\\EpicGamesLauncher.exe", "matching_strategy": "Equals" },
+    { "kind": "Path", "id": "C:\\Program Files (x86)\\Ubisoft\\Ubisoft Game Launcher\\UbisoftConnect.exe", "matching_strategy": "Equals" },
+    { "kind": "Path", "id": "E:\\Riot Games\\Riot Client\\RiotClientServices.exe", "matching_strategy": "Equals" },
+    { "kind": "Path", "id": "C:\\Users\\TheKi\\AppData\\Roaming\\.minecraft\\TLauncher.exe", "matching_strategy": "Equals" },
+    { "kind": "Path", "id": "C:\\Users\\TheKi\\AppData\\Local\\Programs\\Paradox Interactive\\launcher\\bootstrapper-v2.exe", "matching_strategy": "Equals" }
+  ],
+
+  "floating_applications": [
+    { "kind": "Exe", "id": "Rainmeter.exe", "matching_strategy": "Equals" },
+    { "kind": "Title", "id": "Settings", "matching_strategy": "Equals" },
+    { "kind": "Exe", "id": "SystemSettings.exe", "matching_strategy": "Equals" },
+    { "kind": "Exe", "id": "Taskmgr.exe", "matching_strategy": "Equals" },
+    { "kind": "Exe", "id": "mmc.exe", "matching_strategy": "Equals" }
+  ],
+
+  "monitors": [
+    {
+      "workspaces": [
+        { "name": "1", "layout": "BSP" },
+        { "name": "2", "layout": "BSP" },
+        { "name": "3", "layout": "BSP" },
+        { "name": "4", "layout": "BSP" },
+        { "name": "5", "layout": "BSP" }
+      ]
+    }
+  ]
+}
