@@ -1,0 +1,93 @@
+# whkdrc - keybindings for komorebi
+#
+# Mod is Alt, not Win. Windows reserves most Win+<key> combinations at the shell
+# level and they cannot be reliably intercepted, so Alt is the practical
+# equivalent of SUPER here. Layout mirrors a typical Hyprland config.
+
+.shell powershell
+
+# --- focus ---------------------------------------------------------------
+alt + h                     : komorebic focus left
+alt + j                     : komorebic focus down
+alt + k                     : komorebic focus up
+alt + l                     : komorebic focus right
+
+# Win + arrows mimic stock Windows snap (half-screen, second press undoes it -
+# up/down go on to maximise/minimise). They need to remember what the previous
+# press did, so they call a helper rather than a plain komorebic command; it is
+# bound here rather than in the resident AutoHotkey script because that script's
+# Win-key handler breaks AHK's own `#Up`/`#Down` matching, and whkd's hook is
+# independent of it. Focus switching between tiled windows is on alt+hjkl above.
+win + left                  : & "$Env:LOCALAPPDATA\Programs\AutoHotkey\v2\AutoHotkey64.exe" "$Env:LOCALAPPDATA\GruvGoldRice\snap-half.ahk" left
+win + right                 : & "$Env:LOCALAPPDATA\Programs\AutoHotkey\v2\AutoHotkey64.exe" "$Env:LOCALAPPDATA\GruvGoldRice\snap-half.ahk" right
+win + up                    : & "$Env:LOCALAPPDATA\Programs\AutoHotkey\v2\AutoHotkey64.exe" "$Env:LOCALAPPDATA\GruvGoldRice\snap-half.ahk" top
+win + down                  : & "$Env:LOCALAPPDATA\Programs\AutoHotkey\v2\AutoHotkey64.exe" "$Env:LOCALAPPDATA\GruvGoldRice\snap-half.ahk" bottom
+
+# Windows 11 24H2 minimises the YASB bar along with everything else on native
+# Win+D and does not reliably bring it back (upstream, see toggle-desktop.ahk).
+# Reimplemented here instead, same trick as the snap keys above.
+win + d                     : & "$Env:LOCALAPPDATA\Programs\AutoHotkey\v2\AutoHotkey64.exe" "$Env:LOCALAPPDATA\GruvGoldRice\toggle-desktop.ahk"
+
+win + shift + left          : komorebic move left
+win + shift + right         : komorebic move right
+alt + oem_4                 : komorebic cycle-focus previous   # alt + [
+alt + oem_6                 : komorebic cycle-focus next       # alt + ]
+
+# --- move ----------------------------------------------------------------
+alt + shift + h             : komorebic move left
+alt + shift + j             : komorebic move down
+alt + shift + k             : komorebic move up
+alt + shift + l             : komorebic move right
+alt + shift + return        : komorebic promote
+
+# --- resize --------------------------------------------------------------
+alt + oem_minus             : komorebic resize-axis horizontal decrease
+alt + oem_plus              : komorebic resize-axis horizontal increase
+alt + shift + oem_minus     : komorebic resize-axis vertical decrease
+alt + shift + oem_plus      : komorebic resize-axis vertical increase
+
+# --- window state --------------------------------------------------------
+alt + q                     : komorebic close
+alt + f                     : komorebic toggle-monocle
+alt + shift + f             : komorebic toggle-maximize
+alt + t                     : komorebic toggle-tiling
+win + j                     : komorebic toggle-tiling   # tiling <-> free/edge-adjacent for this workspace
+
+# --- stacking ------------------------------------------------------------
+alt + left                  : komorebic stack left
+alt + down                  : komorebic stack down
+alt + up                    : komorebic stack up
+alt + right                 : komorebic stack right
+alt + shift + u             : komorebic unstack
+alt + oem_3                 : komorebic cycle-stack next       # alt + `
+
+# --- layouts -------------------------------------------------------------
+alt + shift + b             : komorebic change-layout bsp
+alt + shift + c             : komorebic change-layout columns
+alt + shift + r             : komorebic change-layout rows
+alt + shift + v             : komorebic change-layout vertical-stack
+alt + shift + t             : komorebic change-layout ultrawide-vertical-stack
+alt + shift + x             : komorebic flip-layout horizontal
+alt + shift + y             : komorebic flip-layout vertical
+
+# --- workspaces ----------------------------------------------------------
+alt + 1                     : komorebic focus-workspace 0
+alt + 2                     : komorebic focus-workspace 1
+alt + 3                     : komorebic focus-workspace 2
+alt + 4                     : komorebic focus-workspace 3
+alt + 5                     : komorebic focus-workspace 4
+
+alt + shift + 1             : komorebic move-to-workspace 0
+alt + shift + 2             : komorebic move-to-workspace 1
+alt + shift + 3             : komorebic move-to-workspace 2
+alt + shift + 4             : komorebic move-to-workspace 3
+alt + shift + 5             : komorebic move-to-workspace 4
+
+# --- session -------------------------------------------------------------
+alt + shift + q             : komorebic reload-configuration
+# Fixes a phantom full-screen accent border with nothing behind it - some
+# apps with multi-stage startups (game launchers) spawn/destroy invisible
+# IME helper windows faster than komorebi reclassifies them against
+# ignore_rules, leaving a stale tiled reference. This forces a full re-scan.
+alt + shift + r             : komorebic retile
+alt + shift + escape        : komorebic stop --whkd
