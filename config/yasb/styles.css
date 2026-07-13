@@ -1,0 +1,812 @@
+/*  YASB - GruvGold
+ *
+ *  Gruvbox Dark on a pure-black base, gold accent.
+ *  Extracted from references/obsidian_rice.png - see palette.json.
+ *
+ *  YASB styles with Qt's CSS subset, not real CSS: no custom properties,
+ *  no :root, no calc(), no `auto` margins. Hex values are repeated literally.
+ *
+ *    bg       #000000   bg_alt  #0D0C09   bg_elev #16130D   border #282421
+ *    fg       #FBF1C7   fg_dim  #BDAE93   fg_muted #7C6F64
+ *    gold     #D5AC45   red #FB4934  green #B8BB26  yellow #FABD2F
+ *
+ *  Font matches this machine's Windows Terminal profile: JetBrainsMono NF at
+ *  11pt = 11 * 96 / 72 = 15px. One size everywhere.
+ *
+ *  LAYOUT NOTE: the bar itself is fully transparent. Only the pills below draw
+ *  a surface, so the wallpaper shows between them.
+ */
+
+* {
+    font-size: 15px;
+    font-family: "JetBrainsMono NF", "Segoe UI Variable", sans-serif;
+    font-weight: 400;
+    color: #BDAE93;
+    margin: 0;
+    padding: 0;
+}
+
+/* The whole point: no continuous black strip. */
+.yasb-bar {
+    background-color: transparent;
+}
+
+.widget {
+    padding: 0;
+    margin: 0;
+}
+
+/* ================================================================ left group */
+
+.clock-pill {
+    background-color: rgba(8, 7, 5, 0.82);
+    border: 1px solid #282421;
+    border-radius: 15px;
+    margin: 1px 0 8px 12px;
+    padding: 0 16px;
+}
+
+.clock-pill .label {
+    color: #FBF1C7;
+    font-weight: 700;
+    font-size: 16.5px;
+    padding: 4px 0;
+}
+
+/* Deliberately no surface - floats straight over the wallpaper. */
+.net-bare {
+    background-color: transparent;
+    border: none;
+    margin: 1px 0 8px 8px;
+    padding: 0;
+    /* Pinned width. Without it the label reflows every second as speeds roll
+       9 -> 10 -> 100 Kbps, which jitters the text and drags the rest along. */
+    min-width: 200px;
+    max-width: 200px;
+}
+
+.net-bare .label {
+    color: #BDAE93;
+    padding: 4px 0;
+}
+
+/* ============================================================== centre island */
+/* No fixed width needed: the bar's `center` region recentres it, so it stays
+   centred on screen as the window title changes length. */
+
+.context-island {
+    background-color: rgba(8, 7, 5, 0.82);
+    border: 1px solid #282421;
+    border-radius: 15px;
+    margin: 1px 0 8px 0;
+    padding: 0 18px;
+    /* Capped so a long window title cannot grow the island out sideways into
+       the network readout on the left. */
+    max-width: 420px;
+}
+
+.context-island .label {
+    color: #BDAE93;
+    font-size: 16.5px;
+    padding: 4px 0;
+    qproperty-alignment: 'AlignCenter';
+}
+
+/* =============================================================== media pill */
+/* Bars, controls and the track label all live inside the one media widget now
+   (see visualizer: under the media widget in config.yaml) - a single pill
+   that never falls apart into two shapes when the visualiser collapses on
+   pause, because there is no longer a second widget to fall apart from. */
+
+.media-main {
+    background-color: rgba(8, 7, 5, 0.82);
+    border: 1px solid #282421;
+    border-radius: 15px;
+    margin: 1px 0 8px 0;
+    padding: 0 16px 0 10px;
+    /* Pinned so the pill does not resize on every track change. */
+    min-width: 235px;
+    max-width: 235px;
+}
+
+/* The canvas paints itself via -qproperty-fillbrush, not background-color -
+   .bar was never a real class here, so the bars rendered at their Qt default
+   (white) regardless of what this file said. Matches fg_dim so the bars read
+   as part of the bar's text, not a stray white blob.
+   The gap before the first button is set in code (the wrapper's own layout
+   margin), not here - this custom-painted widget doesn't reliably honour a
+   plain QSS margin the way a QLabel/QPushButton does. */
+.media-main .audio-visualizer-canvas {
+    -qproperty-fillbrush: #BDAE93;
+}
+
+.media-main .label {
+    color: #BDAE93;
+    padding: 4px 0;
+    /* Slight breathing room after the controls, so the track title doesn't
+       run straight into the next button. */
+    margin-left: 6px;
+}
+
+.media-main .btn {
+    color: #BDAE93;
+    font-size: 16.5px;
+    padding: 4px 0;
+    /* Same box as the system pill's icons - see .sys-* .label below: same
+       font-size and the same min-width-driven, AlignCenter-ed spacing.
+       .media-main is pinned to a fixed width (see above) and these buttons
+       are the only flexible items besides the track label, so both bounds
+       are needed - without max-width too they stretch to soak up whatever
+       width the label doesn't need, spreading them apart again. */
+    min-width: 22px;
+    max-width: 22px;
+}
+
+.media-main .btn:hover {
+    color: #FBF1C7;
+}
+
+.media-main .btn.disabled {
+    color: #3A342B;
+}
+
+/* ============================================================== system pill */
+/* Five widgets drawn as one continuous pill: wifi is the rounded left cap,
+   power the rounded right cap, and everything between is square-edged so the
+   seams disappear. power_menu accepts no class_name option, so it is targeted
+   by its built-in .power-menu-widget class. */
+
+.sys-wifi,
+.sys-bt,
+.sys-battery,
+.sys-cc,
+.sys-bin,
+.power-menu-widget {
+    background-color: rgba(8, 7, 5, 0.82);
+    border-top: 1px solid #282421;
+    border-bottom: 1px solid #282421;
+    border-left: none;
+    border-right: none;
+    border-radius: 0;
+    margin: 1px 0 8px 0;
+    /* Narrow, because the labels below carry their own slack - see min-width.
+       This is the BETWEEN-icon padding (each side of every widget here except
+       the two outer edges, which are overridden below) - it stacks with the
+       neighbour's own padding to form the visible gap between two icons. */
+    padding: 0 2px;
+}
+
+.sys-wifi {
+    border-left: 1px solid #282421;
+    border-top-left-radius: 15px;
+    border-bottom-left-radius: 15px;
+    padding-left: 8px;
+}
+
+.power-menu-widget {
+    border-right: 1px solid #282421;
+    border-top-right-radius: 15px;
+    border-bottom-right-radius: 15px;
+    margin-right: 12px;
+    padding-right: 11px;
+}
+
+/* These Nerd Font glyphs paint wider than the advance width Qt sizes a label to,
+   so a label left at its natural width slices the right off the wifi fan and the
+   power ring. min-width gives every icon slack to paint into and AlignCenter
+   splits that slack evenly, which is also what keeps them evenly spaced. */
+.sys-wifi .label,
+.sys-bt .label,
+.sys-battery .label,
+.sys-cc .label,
+.sys-bin .label,
+.power-menu-widget .label {
+    color: #BDAE93;
+    font-size: 16.5px;
+    padding: 4px 0;
+    /* Capped as well as floored - battery's glyph is naturally wider than
+       the others, so with no ceiling its label grew past 22px and pushed
+       extra gap onto both of its neighbours instead of every icon sharing
+       the same box. */
+    min-width: 22px;
+    max-width: 26px;
+    qproperty-alignment: 'AlignCenter';
+}
+
+/* Battery's label toggles on click between the narrow icon and
+   "icon  40%  ·  24 minutes" - the shared cap above only fits the icon, so
+   battery needs its own wider ceiling instead of clipping the detail text. */
+.sys-battery .label {
+    min-width: 22px;
+    max-width: 220px;
+    font-size: 15px;
+}
+
+.sys-wifi .label:hover,
+.sys-bt .label:hover,
+.sys-cc .label:hover,
+.sys-bin .label:hover,
+.power-menu-widget .label:hover {
+    color: #FBF1C7;
+}
+
+/* Battery needs its own rule: the status-* colours further down are as specific
+   as `.sys-battery .label`, so only the extra :hover outranks them. */
+.sys-battery .label:hover {
+    color: #FBF1C7;
+}
+
+/* Battery colour by charge. YASB rebuilds the widget's class list as the level
+   changes, so qualifying these with .sys-battery does not match. Key them on the
+   status class alone - only the battery widget uses status-*, so it stays scoped
+   in practice. */
+.status-full .label,
+.status-high .label {
+    color: #B8BB26;
+}
+
+.status-medium .label {
+    color: #FABD2F;
+}
+
+.status-low .label {
+    color: #FE8019;
+}
+
+.status-critical .label {
+    color: #FB4934;
+}
+
+.charging .label {
+    color: #8EC07C;
+}
+
+/* ================================================================== popups */
+
+.calendar,
+.media-menu {
+    background-color: #0D0C09;
+    border: 1px solid #282421;
+    border-radius: 10px;
+}
+
+/* ---- hover pill ---- */
+/* YASB's CustomToolTip, centred just below the widget. Same surface as the
+   bar's own pills so it reads as part of the bar. */
+
+.tooltip {
+    background-color: rgba(8, 7, 5, 0.82);
+    border: 1px solid #282421;
+    border-radius: 12px;
+    color: #BDAE93;
+    font-size: 14px;
+    padding: 7px 14px;
+}
+
+/* ------------------------------------------------ wifi / bluetooth flyouts */
+/* Laid out to match the Windows quick-settings flyouts these replace: a titled
+   header with the radio toggle on the right, a scrolling list of rows carrying
+   icon + name + status, and a footer linking into the Settings app. Without
+   these rules the menus inherit the `*` reset at the top of this file, which
+   strips every padding and collapses the rows onto each other. */
+
+.wifi-menu,
+.bluetooth-menu {
+    background-color: #0D0C09;
+    border: 1px solid #282421;
+    border-radius: 12px;
+    min-width: 360px;
+    max-width: 360px;
+}
+
+.wifi-menu .header,
+.bluetooth-menu .header {
+    background-color: #16130D;
+    border-bottom: 1px solid #282421;
+    color: #FBF1C7;
+    font-size: 15px;
+    font-weight: 700;
+    padding: 14px 16px;
+}
+
+/* "New devices" / "Your devices" section labels inside the list. */
+.bluetooth-menu .section-title {
+    padding: 8px 16px 4px;
+}
+
+/* The bluetooth radio on/off switch, top-right of the header. */
+.bluetooth-menu .power-button {
+    background-color: #282421;
+    border: 1px solid #3A342B;
+    border-radius: 10px;
+    color: #7C6F64;
+    font-size: 13px;
+    padding: 4px 12px;
+}
+
+.bluetooth-menu .power-button:checked {
+    background-color: #D5AC45;
+    border: 1px solid #D5AC45;
+    color: #0D0C09;
+    font-weight: 700;
+}
+
+/* These lists divide whatever height they are given evenly among their rows
+   rather than scrolling, so the height has to be large enough for the rows the
+   machine actually has - too small and the rows compress until the status text
+   overlaps the next device's name. Sized here for ~10 paired devices; raise it
+   if rows start colliding after pairing more.
+   ponytail: fixed height, needs a taller value (or an upstream fix that lets
+   the list scroll) if the device count grows. */
+.wifi-menu .wifi-list,
+.bluetooth-menu .bluetooth-list,
+.wifi-menu QScrollArea,
+.bluetooth-menu QScrollArea {
+    background-color: transparent;
+    border: none;
+}
+
+/* The wifi list ends in a stretch, so its rows keep their natural height and
+   this is just how much of the panel the list gets. */
+.wifi-menu QScrollArea {
+    min-height: 260px;
+}
+
+/* The bluetooth list has no trailing stretch: it divides its height evenly
+   among the rows instead of scrolling, so this has to be tall enough for the
+   devices the machine actually has. Too small and each row is compressed until
+   the status text overlaps the next device's name. Sized for ~10 paired
+   devices; raise it if rows start colliding after pairing more. */
+.bluetooth-menu QScrollArea {
+    min-height: 440px;
+}
+
+/* ---- one network / device row ---- */
+
+.wifi-menu .wifi-item,
+.bluetooth-menu .bluetooth-item {
+    background-color: transparent;
+    border: none;
+    border-radius: 8px;
+    margin: 2px 8px;
+    padding: 6px 10px;
+}
+
+.wifi-menu .wifi-item:hover,
+.bluetooth-menu .bluetooth-item:hover {
+    background-color: #16130D;
+}
+
+.wifi-menu .wifi-item.active,
+.bluetooth-menu .bluetooth-item.active {
+    background-color: rgba(213, 172, 69, 0.14);
+    border: 1px solid #D5AC45;
+}
+
+.wifi-menu .details-container,
+.bluetooth-menu .details-container,
+.wifi-menu .right-container,
+.wifi-menu .controls-container,
+.bluetooth-menu .controls-container {
+    background-color: transparent;
+    border: none;
+}
+
+.wifi-menu .icon,
+.bluetooth-menu .icon {
+    color: #D5AC45;
+    font-size: 18px;
+    padding-right: 12px;
+}
+
+.wifi-menu .name,
+.bluetooth-menu .name {
+    color: #FBF1C7;
+    font-size: 15px;
+}
+
+.wifi-menu .status,
+.bluetooth-menu .status,
+.wifi-menu .strength,
+.bluetooth-menu .battery-icon {
+    color: #7C6F64;
+    font-size: 13px;
+}
+
+/* Connect / Disconnect and the password field. Neither carries a class of its
+   own, so they are matched on their Qt type. */
+.wifi-menu QPushButton,
+.bluetooth-menu QPushButton {
+    background-color: #282421;
+    border: 1px solid #3A342B;
+    border-radius: 6px;
+    color: #FBF1C7;
+    font-size: 13px;
+    padding: 7px 18px;
+}
+
+.wifi-menu QPushButton:hover,
+.bluetooth-menu QPushButton:hover {
+    background-color: #D5AC45;
+    border: 1px solid #D5AC45;
+    color: #0D0C09;
+}
+
+.wifi-menu QLineEdit {
+    background-color: #000000;
+    border: 1px solid #3A342B;
+    border-radius: 6px;
+    color: #FBF1C7;
+    font-size: 14px;
+    padding: 7px 10px;
+    margin-right: 8px;
+}
+
+.wifi-menu QLineEdit:focus {
+    border: 1px solid #D5AC45;
+}
+
+.wifi-menu .progress-bar,
+.bluetooth-menu .progress-bar {
+    background-color: #D5AC45;
+    max-height: 2px;
+}
+
+.wifi-menu .error-message,
+.bluetooth-menu .error-message {
+    color: #FB4934;
+    font-size: 13px;
+    padding: 6px 16px;
+}
+
+/* ---- footer: the link out to the Settings app ---- */
+
+.wifi-menu .footer,
+.bluetooth-menu .footer {
+    background-color: #0A0907;
+    border-top: 1px solid #282421;
+    padding: 10px 16px;
+}
+
+.wifi-menu .settings-button,
+.bluetooth-menu .settings-button,
+.wifi-menu .refresh-icon,
+.bluetooth-menu .scan-icon {
+    background-color: transparent;
+    border: none;
+    color: #BDAE93;
+    font-size: 14px;
+    padding: 2px 4px;
+}
+
+.wifi-menu .settings-button:hover,
+.bluetooth-menu .settings-button:hover,
+.wifi-menu .refresh-icon:hover,
+.bluetooth-menu .scan-icon:hover {
+    background-color: transparent;
+    color: #D5AC45;
+}
+
+/* --------------------------------------------------- control centre popup */
+/* The battery widget has no menu of its own, so this is the quick-settings
+   panel that sits beside it: sliders, power plan / power mode, and the profile,
+   settings and power buttons. */
+
+.control-center-menu {
+    background-color: #0D0C09;
+    border: 1px solid #282421;
+    border-radius: 12px;
+    min-width: 280px;
+    max-width: 280px;
+    /* The popup's own QVBoxLayout has its contentsMargins set explicitly in
+       code (control_center.py), which overrides this padding - kept only so
+       the intent is documented here too; change both together. */
+    padding: 14px 16px;
+}
+
+.control-center-menu .section {
+    background-color: transparent;
+    border: none;
+    padding: 8px 0;
+}
+
+.control-center-menu .section.power {
+    border-top: 1px solid #282421;
+    padding-top: 14px;
+}
+
+.control-center-menu .title {
+    color: #7C6F64;
+    font-size: 13px;
+    padding-bottom: 4px;
+}
+
+.control-center-menu .subtext {
+    color: #7C6F64;
+    font-size: 12px;
+}
+
+.control-center-menu .username {
+    color: #FBF1C7;
+    font-weight: 700;
+    padding-left: 10px;
+}
+
+/* ---- sliders ---- */
+
+/* Settings/power/slider glyphs are Segoe Fluent Icons codepoints, not Nerd
+   Font ones - the global `*` reset forces JetBrainsMono NF everywhere, which
+   doesn't have these, so without this override they rendered as tofu/blank. */
+.control-center-menu .icon {
+    font-family: "Segoe Fluent Icons", "Segoe MDL2 Assets";
+    color: #D5AC45;
+    font-size: 16px;
+    padding-right: 10px;
+    /* Each glyph has a different advance width - without a floor here the
+       row after it (the label, then the slider) starts at a different x per
+       row. Volume's glyph is narrower, so it was the one drifting left. */
+    min-width: 20px;
+}
+
+.control-center-menu .row-label {
+    color: #BDAE93;
+    padding-right: 10px;
+    /* Long enough for "Microphone" so every row's slider lines up. */
+    min-width: 82px;
+}
+
+.control-center-menu QSlider::groove:horizontal {
+    background-color: #282421;
+    height: 4px;
+    border-radius: 2px;
+}
+
+.control-center-menu QSlider::sub-page:horizontal {
+    background-color: #D5AC45;
+    border-radius: 2px;
+}
+
+.control-center-menu QSlider::add-page:horizontal {
+    background-color: #282421;
+    border-radius: 2px;
+}
+
+.control-center-menu QSlider::handle:horizontal {
+    background-color: #FBF1C7;
+    border: none;
+    width: 12px;
+    height: 12px;
+    margin: -5px 0;
+    border-radius: 6px;
+}
+
+.control-center-menu .slider.disabled QSlider::sub-page:horizontal {
+    background-color: #3A342B;
+}
+
+/* ---- buttons: power plan / power mode / settings / power / avatar ---- */
+
+.control-center-menu .button,
+.control-center-menu .plan-name,
+.control-center-menu .mode-name {
+    background-color: #16130D;
+    border: 1px solid #282421;
+    border-radius: 8px;
+    color: #BDAE93;
+    font-size: 14px;
+    padding: 9px 12px;
+}
+
+/* Each sits in a 50%-width grid cell (see power.py) - without a cap they
+   stretch to fill it, which made them look oversized; centered in the cell
+   (set in code) now that they're capped smaller than it. */
+.control-center-menu .plan-name,
+.control-center-menu .mode-name {
+    max-width: 130px;
+}
+
+.control-center-menu .button:hover,
+.control-center-menu .plan-name:hover,
+.control-center-menu .mode-name:hover {
+    background-color: #282421;
+    color: #FBF1C7;
+}
+
+.control-center-menu .button.profile-image {
+    background-color: transparent;
+    border: 1px solid #D5AC45;
+    /* Larger than half of any sane profile_image_size - Qt clips this to
+       min(width, height) / 2, so it's always a full circle on the now-square
+       button (set in code) regardless of the exact configured size. */
+    border-radius: 999px;
+    padding: 0;
+}
+
+.control-center-menu .button.settings {
+    font-family: "Segoe Fluent Icons", "Segoe MDL2 Assets";
+    font-size: 16px;
+    background-color: transparent;
+    border: none;
+    color: #BDAE93;
+    padding: 6px 8px;
+}
+
+.control-center-menu .button.settings:hover {
+    background-color: transparent;
+    color: #D5AC45;
+}
+
+/* Right-click menu on a network: Auto-connect, Forget Network. */
+.wifi-menu .context-menu,
+.context-menu {
+    background-color: #0D0C09;
+    border: 1px solid #282421;
+    border-radius: 8px;
+    padding: 4px;
+}
+
+.context-menu::item {
+    color: #BDAE93;
+    padding: 7px 14px;
+    border-radius: 5px;
+}
+
+.context-menu::item:selected {
+    background-color: #282421;
+    color: #FBF1C7;
+}
+
+.calendar .calendar-table,
+.calendar .calendar-table::item {
+    background-color: #0D0C09;
+    color: #BDAE93;
+}
+
+.calendar .calendar-table::item:selected {
+    color: #000000;
+    background-color: #D5AC45;
+    border-radius: 4px;
+}
+
+.calendar .day-label,
+.calendar .month-label,
+.calendar .date-label {
+    color: #FBF1C7;
+    font-weight: 700;
+}
+
+.calendar .week-label {
+    color: #665C54;
+}
+
+.media-menu .title {
+    color: #FBF1C7;
+    font-weight: 700;
+}
+
+.media-menu .artist {
+    color: #7C6F64;
+}
+
+.media-menu .playback-progress {
+    color: #D5AC45;
+}
+
+/* ============================================================== power menu */
+/* Target: reference_4.png - a blurred, dimmed wallpaper with one large rounded
+   card floating on it. blur_background in config.yaml does the frosting; this
+   dim layer must stay translucent so the wallpaper reads through it. */
+
+.power-menu-overlay {
+    background-color: rgba(10, 9, 7, 0.55);
+}
+
+/* The card. */
+.power-menu-popup {
+    background-color: rgba(13, 12, 9, 0.90);
+    border: 1px solid #3A342B;
+    border-radius: 24px;
+    padding: 40px 46px 34px 46px;
+}
+
+/* ---- account block ---- */
+
+.power-menu-popup .profile-avatar {
+    /* No QSS border/radius here - a QLabel's stylesheet border and its
+       raster pixmap are painted by different code paths and don't reliably
+       line up on a circle, which showed up as a ring that appeared on some
+       edges and not others. The circular clip AND the ring around it are
+       both baked into the pixmap itself instead (see power_menu.py). */
+    margin-bottom: 14px;
+}
+
+.power-menu-popup .profile-info {
+    background-color: transparent;
+    margin-bottom: 26px;
+}
+
+.power-menu-popup .profile-username {
+    color: #FBF1C7;
+    font-size: 22px;
+    font-weight: 700;
+    padding-bottom: 4px;
+    qproperty-alignment: 'AlignCenter';
+}
+
+.power-menu-popup .profile-account-type,
+.power-menu-popup .profile-email {
+    color: #7C6F64;
+    font-size: 13px;
+    padding-bottom: 2px;
+    qproperty-alignment: 'AlignCenter';
+}
+
+/* ---- the 3 x 2 action grid ---- */
+
+.power-menu-popup .button {
+    background-color: rgba(22, 19, 13, 0.92);
+    border: 1px solid #282421;
+    border-radius: 16px;
+    margin: 7px;
+    padding: 20px 0;
+    min-width: 168px;
+    max-width: 168px;
+    min-height: 92px;
+    max-height: 92px;
+    color: #BDAE93;
+}
+
+.power-menu-popup .button:hover {
+    background-color: rgba(40, 36, 33, 0.96);
+    border: 1px solid #D5AC45;
+    color: #FBF1C7;
+}
+
+/* Keyboard focus / active selection. */
+.power-menu-popup .button:focus,
+.power-menu-popup .button.focused {
+    background-color: rgba(213, 172, 69, 0.20);
+    border: 1px solid #D5AC45;
+    color: #FBF1C7;
+}
+
+.power-menu-popup .button .icon {
+    font-size: 30px;
+    color: #D5AC45;
+    padding-bottom: 10px;
+    qproperty-alignment: 'AlignCenter';
+}
+
+.power-menu-popup .button .label {
+    font-size: 14px;
+    color: #BDAE93;
+    qproperty-alignment: 'AlignCenter';
+}
+
+.power-menu-popup .button:hover .icon,
+.power-menu-popup .button:focus .icon {
+    color: #FBF1C7;
+}
+
+.power-menu-popup .button:hover .label,
+.power-menu-popup .button:focus .label {
+    color: #FBF1C7;
+}
+
+/* ---- uptime, bottom centre of the screen ---- */
+/* A small pill, same surface as the bar's own pills, sitting clear of the
+   screen edge (the bottom margin is set in code - see boot_time()). */
+
+.power-menu-overlay .uptime {
+    background-color: rgba(22, 19, 13, 0.92);
+    border: 1px solid #282421;
+    border-radius: 14px;
+    padding: 8px 18px;
+}
+
+.power-menu-overlay .uptime-text,
+.power-menu-popup .uptime {
+    color: #7C6F64;
+    font-size: 14px;
+    qproperty-alignment: 'AlignCenter';
+}
