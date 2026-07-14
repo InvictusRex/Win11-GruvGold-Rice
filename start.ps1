@@ -105,7 +105,14 @@ function Launch($label, $exe, $argList, $procName) {
     } catch { Say "$label failed: $($_.Exception.Message)" 'Red' }
 }
 
-Launch 'Everything'     $bin.everything '-startup'                'Everything'
+# Everything also runs as a session-0 Windows service, which Flow Launcher's IPC
+# cannot reach - only count the instance in this user's session as "already running".
+$mySession = (Get-Process -Id $PID).SessionId
+if (Get-Process Everything -ErrorAction SilentlyContinue | Where-Object { $_.SessionId -eq $mySession }) {
+    Say 'Everything already running' 'DarkGray'
+} else {
+    Launch 'Everything' $bin.everything '-startup' $null
+}
 Launch 'TranslucentTB'  $bin.ttb       $null                     'TranslucentTB'
 Launch 'YASB'           $bin.yasb      $null                     'yasb'
 Launch 'Flow Launcher'  $bin.flow      $null                     'Flow.Launcher'
