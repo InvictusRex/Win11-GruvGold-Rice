@@ -207,6 +207,21 @@ if (-not $SkipConfigs) {
             # built-in plugins (including our hand-patched PluginIndicator) and undo
             # the local rebuild - off, and only ever updated by hand.
             $fs | Add-Member AutoUpdatePlugins $false -Force
+
+            # "exam: on" / "exam: off" launcher shortcut (config/flow-launcher/plugins/ExamMode).
+            # Python plugin, so point Flow at an installed Python - left empty it prompts
+            # to download its own embedded one.
+            $py = Get-ChildItem "$env:LOCALAPPDATA\Programs\Python\Python3*\python.exe" -ErrorAction SilentlyContinue |
+                Sort-Object { [version](($_.Directory.Name -replace 'Python(\d)(\d+)', '$1.$2')) } -Descending |
+                Select-Object -First 1
+            if ($py) {
+                $fs.PluginSettings.PythonExecutablePath = $py.FullName
+                $examDir = "$env:APPDATA\FlowLauncher\Plugins\ExamMode"
+                New-Item -ItemType Directory -Path $examDir -Force | Out-Null
+                Copy-Item (Join-Path $cfg 'flow-launcher\plugins\ExamMode\*') $examDir -Force
+                Join-Path $repo 'exam-mode.ps1' | Set-Content (Join-Path $examDir 'examscript.txt') -Encoding utf8 -NoNewline
+                Say "installed exam: on/off launcher shortcut" 'Green'
+            } else { Say "no Python found - skipped the exam: launcher shortcut" 'DarkYellow' }
             $fs | ConvertTo-Json -Depth 32 | Set-Content $flowMainSettings -Encoding utf8
 
             $ws = Get-Content $webSearchSettings -Raw | ConvertFrom-Json
@@ -322,6 +337,23 @@ if (Get-Command oh-my-posh -ErrorAction SilentlyContinue) {
         } else {
             Add-Content $p "`n$init"
             Say "added prompt to $(Split-Path $p -Leaf)" 'Green'
+        }
+    }
+
+    # "exam: on" / "exam: off" from any PowerShell, whatever the working directory.
+    # The repo path is baked in at apply time.
+    $examMarker = '# --- GruvGold exam mode ---'
+    $examFn = @"
+$examMarker
+function exam: { & powershell.exe -NoProfile -ExecutionPolicy Bypass -File "$repo\exam-mode.ps1" `$(if ("`$args" -eq 'off') { '-Off' }) }
+"@
+    foreach ($p in @(
+        "$env:USERPROFILE\Documents\PowerShell\Microsoft.PowerShell_profile.ps1",
+        "$env:USERPROFILE\Documents\WindowsPowerShell\Microsoft.PowerShell_profile.ps1"
+    )) {
+        if (-not ((Get-Content $p -Raw -ErrorAction SilentlyContinue) -match [regex]::Escape($examMarker))) {
+            Add-Content $p "`n$examFn"
+            Say "added exam: function to $(Split-Path $p -Leaf)" 'Green'
         }
     }
 
