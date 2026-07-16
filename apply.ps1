@@ -69,6 +69,14 @@ if (-not $SkipConfigs) {
     Deploy (Join-Path $cfg 'yasb\config.yaml') "$env:USERPROFILE\.config\yasb\config.yaml"
     Deploy (Join-Path $cfg 'yasb\styles.css') "$env:USERPROFILE\.config\yasb\styles.css"
 
+    # Without a settings.json TranslucentTB treats every launch as a first run and
+    # pops its welcome dialog at boot. Only seed it - never overwrite the user's own.
+    $ttbSettings = "$env:LOCALAPPDATA\Packages\28017CharlesMilette.TranslucentTB_v826wp6bftszj\RoamingState\settings.json"
+    if (-not (Test-Path $ttbSettings)) {
+        New-Item -ItemType Directory -Path (Split-Path $ttbSettings) -Force | Out-Null
+        Copy-Item (Join-Path $cfg 'translucenttb\settings.json') $ttbSettings
+    }
+
     Head '[2/11] komorebi + whkd'
     Deploy (Join-Path $cfg 'komorebi\komorebi.json') "$env:USERPROFILE\komorebi.json"
     Deploy (Join-Path $cfg 'komorebi\whkdrc')       "$env:USERPROFILE\.config\whkdrc"
