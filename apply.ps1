@@ -440,6 +440,10 @@ public class GruvWallpaper {
     New-ItemProperty $adv -Name TaskbarGlomLevel   -Value 2 -PropertyType DWord -Force | Out-Null
     New-ItemProperty $adv -Name MMTaskbarGlomLevel -Value 2 -PropertyType DWord -Force | Out-Null
     Say "taskbar centred, labels always shown" 'Green'
+    # Explorer still runs its own Win+D alongside the whkd binding and hides the windows
+    # before toggle-desktop.ahk can enumerate them. Needs an Explorer restart to apply.
+    $hot = (Get-ItemProperty $adv -Name DisabledHotkeys -ErrorAction SilentlyContinue).DisabledHotkeys
+    if ($hot -notmatch "D") { New-ItemProperty $adv -Name DisabledHotkeys -Value "$hot`D" -PropertyType String -Force | Out-Null }
 
     # ---- lock screen -----------------------------------------------------
     if (Test-Path $wall) {
