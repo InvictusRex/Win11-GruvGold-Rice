@@ -349,6 +349,7 @@ scrollbarState = 'hidden'
 
     Head '[8/11] oh-my-posh prompt'
     Deploy (Join-Path $cfg 'ohmyposh\gruvgold.omp.json') "$env:USERPROFILE\.config\ohmyposh\gruvgold.omp.json"
+    Deploy (Join-Path $cfg 'fastfetch') "$env:USERPROFILE\.config\fastfetch"
 
     # Append to the profile rather than overwrite it, and only once.
     $marker = '# --- GruvGold prompt ---'

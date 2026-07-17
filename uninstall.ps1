@@ -82,6 +82,7 @@ $ourPaths = @(
     "$env:LOCALAPPDATA\Microsoft\Windows Terminal\Fragments\GruvGold"
     "$env:USERPROFILE\Documents\Rainmeter\Skins\GruvGold"
     "$env:LOCALAPPDATA\GruvGoldRice"
+    "$env:USERPROFILE\.config\fastfetch"
 )
 foreach ($p in $ourPaths) {
     if (Test-Path $p) {
@@ -159,7 +160,7 @@ Write-Host "`n[5/5] Packages" -ForegroundColor Yellow
 if ($RemovePackages) {
     $ours = @('AmN.yasb','LGUG2Z.komorebi','LGUG2Z.whkd','LGUG2Z.masir','Flow-Launcher.Flow-Launcher',
               'Rainmeter.Rainmeter','CharlesMilette.TranslucentTB','AutoHotkey.AutoHotkey',
-              'JanDeDobbeleer.OhMyPosh','aristocratos.btop4win','voidtools.Everything')
+              'JanDeDobbeleer.OhMyPosh','aristocratos.btop4win','voidtools.Everything','Fastfetch-cli.Fastfetch')
     # Microsoft.PowerShell is deliberately absent - too generally useful to rip out.
 
     $pre = @()

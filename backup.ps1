@@ -139,7 +139,7 @@ $state.GetEnumerator() | ForEach-Object { Say ("{0,-22} {1}" -f $_.Key, $_.Value
 $ours = @('AmN.yasb','LGUG2Z.komorebi','LGUG2Z.whkd','Flow-Launcher.Flow-Launcher',
           'Rainmeter.Rainmeter','CharlesMilette.TranslucentTB','AutoHotkey.AutoHotkey',
           'JanDeDobbeleer.OhMyPosh','Microsoft.PowerShell','aristocratos.btop4win',
-          'voidtools.Everything')
+          'voidtools.Everything','Fastfetch-cli.Fastfetch')
 $installed = @()
 foreach ($id in $ours) {
     $r = winget list --id $id --exact --accept-source-agreements 2>&1 | Out-String

@@ -1,0 +1,36 @@
+{
+  "$schema": "https://github.com/fastfetch-cli/fastfetch/raw/dev/doc/json_schema.json",
+  "logo": {
+    // 16 lines tall: spans exactly from the title down to Local IP.
+    "type": "file",
+    "source": "~/.config/fastfetch/dragon.txt",
+    "color": { "1": "red" },
+    "padding": { "top": 1, "left": 4, "right": 3 }
+  },
+  "display": {
+    "color": { "keys": "red", "title": "red" }
+  },
+  "modules": [
+    // Blank first line; with the logo's top padding of 1 the whole block
+    // (art + details) starts one line down and stays aligned.
+    "break",
+    { "type": "title", "format": "{#keys}invictus@{host-name}" },
+    "separator",
+    "os",
+    "host",
+    "kernel",
+    "uptime",
+    "terminal",
+    "cpu",
+    "gpu",
+    "memory",
+    "swap",
+    // Explicit list: auto-detection also probes the mapped NAS shares (W:-Z:),
+    // which stall ~21s each start when they are disconnected.
+    { "type": "disk", "folders": ["C:\\", "D:\\", "E:\\"] },
+    "localip",
+    "break",
+    "colors",
+    "break"
+  ]
+}
