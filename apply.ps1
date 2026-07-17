@@ -307,8 +307,12 @@ if (-not $SkipConfigs) {
             $d = $json.profiles.defaults
             foreach ($kv in @{
                 colorScheme  = 'GruvGold'
-                useAcrylic   = $true
-                opacity      = 88
+                # Plain opacity, not acrylic: on this machine the acrylic body
+                # falls back to solid black even with transparency effects on.
+                useAcrylic   = $false
+                # Low enough that the wallpaper shows through, high enough that
+                # text on pure black keeps its contrast.
+                opacity      = 80
                 # The installed family is "JetBrainsMono NF", not "...Nerd Font".
                 font         = [pscustomobject]@{ face = 'JetBrainsMono NF'; size = 11 }
                 padding      = '0'
@@ -316,8 +320,28 @@ scrollbarState = 'hidden'
             }.GetEnumerator()) {
                 $d | Add-Member $kv.Key $kv.Value -Force
             }
+
+            # Tab row: frosted acrylic instead of the stock grey; tabs take the
+            # terminal's own background. Themes cannot live in a fragment either.
+            $theme = [pscustomobject]@{
+                name   = 'GruvGold'
+                tab    = [pscustomobject]@{ background = 'terminalBackground'; unfocusedBackground = '#00000000' }
+                tabRow = [pscustomobject]@{ background = '#00000000'; unfocusedBackground = '#00000000' }
+                window = [pscustomobject]@{ applicationTheme = 'dark' }
+            }
+            $json | Add-Member themes (@(@($json.themes) | Where-Object { $_ -and $_.name -ne 'GruvGold' }) + $theme) -Force
+            foreach ($kv in @{
+                theme                                = 'GruvGold'
+                useAcrylicInTabRow                   = $true
+                # Acrylic otherwise drops to solid colour whenever the window is
+                # unfocused, which under komorebi is most of the time.
+                'compatibility.enableUnfocusedAcrylic' = $true
+            }.GetEnumerator()) {
+                $json | Add-Member $kv.Key $kv.Value -Force
+            }
+
             $json | ConvertTo-Json -Depth 32 | Set-Content $wt -Encoding utf8
-            Say "patched settings.json (scheme, acrylic, opacity, font)" 'Green'
+            Say "patched settings.json (scheme, opacity, font, tab row theme)" 'Green'
         } catch {
             Say "could not patch Terminal settings.json: $($_.Exception.Message)" 'DarkYellow'
         }
