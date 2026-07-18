@@ -43,7 +43,7 @@ sizes are deliberately not used.
 | Type-on-desktop → launcher, Win key | AutoHotkey v2 | `config/ahk/desktop-type-to-launch.ahk` |
 | Win+Up/Down half-screen snapping | AutoHotkey v2, called by whkd | `config/ahk/snap-half.ahk` |
 | Tiling, gold borders, gaps | komorebi + whkd | `config/komorebi/` |
-| Terminal | Windows Terminal + oh-my-posh | `config/terminal/`, `config/ohmyposh/` |
+| Terminal | Windows Terminal + a plain PowerShell prompt + fastfetch | `config/terminal/`, `config/powershell/`, `config/fastfetch/` |
 | System monitor | btop4win | `config/btop/` |
 
 The bottom bar is the stock Windows taskbar with TranslucentTB making its background

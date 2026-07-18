@@ -264,8 +264,7 @@ if (-not $SkipConfigs) {
     # /beta_updates are 0 out of the box), komorebi/whkd/masir/AutoHotkey/btop4win
     # (no built-in updater), TranslucentTB (no built-in updater).
     # Flow Launcher's AutoUpdates/AutoUpdatePlugins are handled in the plugin
-    # cleanup step above. oh-my-posh's upgrade.notice/auto are set in its own
-    # theme file (config/ohmyposh/gruvgold.omp.json).
+    # cleanup step above.
 
     $rainmeterIni = "$env:APPDATA\Rainmeter\Rainmeter.ini"
     if (Test-Path $rainmeterIni) {
@@ -340,24 +339,36 @@ scrollbarState = 'hidden'
                 $json | Add-Member $kv.Key $kv.Value -Force
             }
 
+            # -NoLogo: no "Windows PowerShell / Copyright" banner and no "Loading
+            # personal and system profiles took ..." line before the greeting.
+            # GUIDs are Terminal's fixed ids for its generated PowerShell profiles.
+            # pwsh by bare name: the Store install's real path carries its version.
+            foreach ($prof in @($json.profiles.list)) {
+                $cmd = switch ($prof.guid) {
+                    '{61c54bbd-c2c6-5271-96e7-009a87ff44bf}' { '%SystemRoot%\System32\WindowsPowerShell\v1.0\powershell.exe -NoLogo' }
+                    '{574e775e-4f2a-5b96-ac1e-a2962a402336}' { 'pwsh.exe -NoLogo' }
+                }
+                if ($cmd) { $prof | Add-Member commandline $cmd -Force }
+            }
+
             $json | ConvertTo-Json -Depth 32 | Set-Content $wt -Encoding utf8
-            Say "patched settings.json (scheme, opacity, font, tab row theme)" 'Green'
+            Say "patched settings.json (scheme, opacity, font, tab row theme, -NoLogo)" 'Green'
         } catch {
             Say "could not patch Terminal settings.json: $($_.Exception.Message)" 'DarkYellow'
         }
     } else { Say "Windows Terminal settings.json not found - open Terminal once first" 'DarkYellow' }
 
-    Head '[8/11] oh-my-posh prompt'
-    Deploy (Join-Path $cfg 'ohmyposh\gruvgold.omp.json') "$env:USERPROFILE\.config\ohmyposh\gruvgold.omp.json"
+    Head '[8/11] PowerShell prompt + fastfetch greeting'
+    Deploy (Join-Path $cfg 'powershell\gruvgold.ps1') "$env:USERPROFILE\.config\powershell\gruvgold.ps1"
     Deploy (Join-Path $cfg 'fastfetch') "$env:USERPROFILE\.config\fastfetch"
 
-    # Append to the profile rather than overwrite it, and only once.
-    $marker = '# --- GruvGold prompt ---'
+    # Append to the profile rather than overwrite it, and only once. Earlier
+    # versions added an oh-my-posh block and a separate greeting block; both
+    # are superseded by gruvgold.ps1, so strip them (marker through closing brace).
+    $marker = '# --- GruvGold shell ---'
     $init   = @"
 $marker
-if (Get-Command oh-my-posh -ErrorAction SilentlyContinue) {
-    oh-my-posh init pwsh --config "`$env:USERPROFILE\.config\ohmyposh\gruvgold.omp.json" | Invoke-Expression
-}
+. "`$env:USERPROFILE\.config\powershell\gruvgold.ps1"
 "@
     foreach ($p in @(
         "$env:USERPROFILE\Documents\PowerShell\Microsoft.PowerShell_profile.ps1",
@@ -365,11 +376,18 @@ if (Get-Command oh-my-posh -ErrorAction SilentlyContinue) {
     )) {
         New-Item -ItemType Directory -Path (Split-Path $p) -Force | Out-Null
         if (-not (Test-Path $p)) { New-Item -ItemType File -Path $p -Force | Out-Null }
-        if ((Get-Content $p -Raw -ErrorAction SilentlyContinue) -match [regex]::Escape($marker)) {
-            Say "prompt already in $(Split-Path $p -Leaf)" 'DarkGray'
+        $text = Get-Content $p -Raw -ErrorAction SilentlyContinue
+        if ($text -match '# --- GruvGold (prompt|greeting) ---') {
+            $text = $text -replace '(?ms)\r?\n?^# --- GruvGold (prompt|greeting) ---\r?\n.*?^\}[^\r\n]*', ''
+            # UTF-8 with BOM: the one encoding both PowerShell 5.1 and 7 read correctly.
+            [IO.File]::WriteAllText($p, $text.TrimEnd() + "`r`n", (New-Object System.Text.UTF8Encoding $true))
+            Say "removed old oh-my-posh/greeting blocks from $(Split-Path $p -Leaf)" 'Green'
+        }
+        if ($text -match [regex]::Escape($marker)) {
+            Say "shell already in $(Split-Path $p -Leaf)" 'DarkGray'
         } else {
             Add-Content $p "`n$init"
-            Say "added prompt to $(Split-Path $p -Leaf)" 'Green'
+            Say "added shell to $(Split-Path $p -Leaf)" 'Green'
         }
     }
 

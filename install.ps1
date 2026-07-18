@@ -25,7 +25,6 @@ $packages = [ordered]@{
     'voidtools.Everything'          = 'Everything (file index for Flow)'
     'AutoHotkey.AutoHotkey'         = 'AutoHotkey v2'
     'Rainmeter.Rainmeter'           = 'Rainmeter'
-    'JanDeDobbeleer.OhMyPosh'       = 'oh-my-posh'
     'aristocratos.btop4win'         = 'btop4win'
     'Fastfetch-cli.Fastfetch'       = 'fastfetch (terminal greeting)'
     'LGUG2Z.komorebi'               = 'komorebi tiling WM'
@@ -34,7 +33,7 @@ $packages = [ordered]@{
 }
 
 if ($IncludeFont) {
-    # Nerd Font for the glyphs YASB, oh-my-posh and btop need.
+    # Nerd Font for the glyphs YASB and btop need.
     # Separate flag because font installs are machine-scope and prompt for elevation.
     $packages['DEVCOM.JetBrainsMonoNerdFont'] = 'JetBrainsMono Nerd Font'
 }
@@ -84,7 +83,7 @@ if ($failed) {
 # shell will not see them until it is restarted. Surface that rather than
 # letting apply.ps1 fail confusingly later.
 $needsNewShell = @()
-foreach ($exe in 'komorebic', 'whkd', 'yasbc', 'oh-my-posh') {
+foreach ($exe in 'komorebic', 'whkd', 'yasbc', 'fastfetch') {
     if (-not (Get-Command $exe -ErrorAction SilentlyContinue)) { $needsNewShell += $exe }
 }
 if ($needsNewShell) {

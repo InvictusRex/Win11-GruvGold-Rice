@@ -127,7 +127,9 @@ ToggleLauncher() {
 ; prefix key for this combo; the leading `~` is required to also pass Space
 ; through as a normal keystroke everywhere else - without it AHK swallows
 ; every space bar press globally, since Space then has no other hotkey.
-~Space & Enter::Run "powershell.exe"
+; Launched through Terminal (not powershell.exe directly) so it gets the
+; Terminal profile: -NoLogo, home as start dir, and the fastfetch greeting.
+~Space & Enter::Run "wt.exe", EnvGet("USERPROFILE")
 
 ; ---------------------------------------------------------------- escape hatch
 ^!d:: {

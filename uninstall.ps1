@@ -83,6 +83,7 @@ $ourPaths = @(
     "$env:USERPROFILE\Documents\Rainmeter\Skins\GruvGold"
     "$env:LOCALAPPDATA\GruvGoldRice"
     "$env:USERPROFILE\.config\fastfetch"
+    "$env:USERPROFILE\.config\powershell"
 )
 foreach ($p in $ourPaths) {
     if (Test-Path $p) {
