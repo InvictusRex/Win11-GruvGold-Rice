@@ -24,7 +24,7 @@ param(
 
 $ErrorActionPreference = 'Continue'
 $repo = $PSScriptRoot
-$cfg  = Join-Path $repo 'config'
+$cfg  = $repo   # component configs live in top-level folders (yasb/, komorebi/, ...)
 
 function Say($msg, $colour = 'Gray') { Write-Host "  $msg" -ForegroundColor $colour }
 function Head($msg) { Write-Host "`n$msg" -ForegroundColor Yellow }
@@ -216,7 +216,7 @@ if (-not $SkipConfigs) {
             # the local rebuild - off, and only ever updated by hand.
             $fs | Add-Member AutoUpdatePlugins $false -Force
 
-            # "exam: on" / "exam: off" launcher shortcut (config/flow-launcher/plugins/ExamMode).
+            # "exam: on" / "exam: off" launcher shortcut (flow-launcher/plugins/ExamMode).
             # Python plugin, so point Flow at an installed Python - left empty it prompts
             # to download its own embedded one.
             $py = Get-ChildItem "$env:LOCALAPPDATA\Programs\Python\Python3*\python.exe" -ErrorAction SilentlyContinue |

@@ -36,15 +36,15 @@ sizes are deliberately not used.
 
 | What | Tool | Config |
 |---|---|---|
-| Top bar | YASB | `config/yasb/` |
+| Top bar | YASB | `yasb/` |
 | Bottom bar, tray, notifications | native Windows taskbar + TranslucentTB | Settings + TTB |
-| Desktop clock + audio visualiser | Rainmeter | `config/rainmeter/` |
-| Launcher | Flow Launcher | `config/flow-launcher/GruvGold.xaml` |
-| Type-on-desktop → launcher, Win key | AutoHotkey v2 | `config/ahk/desktop-type-to-launch.ahk` |
-| Win+Up/Down half-screen snapping | AutoHotkey v2, called by whkd | `config/ahk/snap-half.ahk` |
-| Tiling, gold borders, gaps | komorebi + whkd | `config/komorebi/` |
-| Terminal | Windows Terminal + a plain PowerShell prompt + fastfetch | `config/terminal/`, `config/powershell/`, `config/fastfetch/` |
-| System monitor | btop4win | `config/btop/` |
+| Desktop clock + audio visualiser | Rainmeter | `rainmeter/` |
+| Launcher | Flow Launcher | `flow-launcher/GruvGold.xaml` |
+| Type-on-desktop → launcher, Win key | AutoHotkey v2 | `ahk/desktop-type-to-launch.ahk` |
+| Win+Up/Down half-screen snapping | AutoHotkey v2, called by whkd | `ahk/snap-half.ahk` |
+| Tiling, gold borders, gaps | komorebi + whkd | `komorebi/` |
+| Terminal | Windows Terminal + a plain PowerShell prompt + fastfetch | `terminal/`, `powershell/`, `fastfetch/` |
+| System monitor | btop4win | `btop/` |
 
 The bottom bar is the stock Windows taskbar with TranslucentTB making its background
 fully transparent, so only the centred buttons and tray float over the wallpaper.
