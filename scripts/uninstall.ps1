@@ -22,7 +22,7 @@ param(
 )
 
 $ErrorActionPreference = 'Continue'
-$repo = $PSScriptRoot
+$repo = Split-Path $PSScriptRoot -Parent   # backups live in backup/ at the repo root
 
 function Say($msg, $colour = 'Gray') { Write-Host "  $msg" -ForegroundColor $colour }
 

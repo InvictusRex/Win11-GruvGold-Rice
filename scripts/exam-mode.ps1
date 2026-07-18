@@ -8,8 +8,8 @@
     masir (global mouse hook) are exactly the shape of thing behavioural
     anti-cheat checks look for even when not named explicitly.
 
-      .\exam-mode.ps1          stop everything, disable autostart
-      .\exam-mode.ps1 -Off     restore autostart, bring the rice back
+      .\scripts\exam-mode.ps1          stop everything, disable autostart
+      .\scripts\exam-mode.ps1 -Off     restore autostart, bring the rice back
 
     Idempotent either way.
 #>
@@ -20,7 +20,7 @@ param(
 )
 
 $ErrorActionPreference = 'Continue'
-$repo     = $PSScriptRoot
+$repo     = Split-Path $PSScriptRoot -Parent
 $pwsh     = (Get-Command powershell.exe).Source
 $startup  = [Environment]::GetFolderPath('Startup')
 $lnk      = Join-Path $startup 'GruvGold - Startup.lnk'
@@ -34,7 +34,7 @@ function Say($msg, $colour = 'Gray') { Write-Host "  $msg" -ForegroundColor $col
 # plain restart on the way out is fire-and-forget (observed to hang indefinitely
 # under -Wait here, and nothing downstream needs to block on it anyway).
 function Invoke-Start([string]$argLine, [switch]$Wait) {
-    $p = @{ FilePath = $pwsh; ArgumentList = "-ExecutionPolicy Bypass -File `"$repo\start.ps1`" $argLine"; WindowStyle = 'Hidden' }
+    $p = @{ FilePath = $pwsh; ArgumentList = "-ExecutionPolicy Bypass -File `"$repo\scripts\start.ps1`" $argLine"; WindowStyle = 'Hidden' }
     if ($Wait) { Start-Process @p -Wait } else { Start-Process @p }
 }
 
@@ -80,4 +80,4 @@ if ($stillUp) {
     Say 'all clear - nothing from the rice is running' 'Green'
 }
 
-Write-Host "`nRun '.\exam-mode.ps1 -Off' afterwards to bring the rice back.`n" -ForegroundColor Cyan
+Write-Host "`nRun '.\scripts\exam-mode.ps1 -Off' afterwards to bring the rice back.`n" -ForegroundColor Cyan

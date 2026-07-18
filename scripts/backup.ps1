@@ -17,7 +17,7 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
-$repo  = $PSScriptRoot
+$repo  = Split-Path $PSScriptRoot -Parent   # backups go to backup/ at the repo root
 $stamp = Get-Date -Format 'yyyyMMdd-HHmmss'
 $dest  = Join-Path $repo "backup\$stamp"
 New-Item -ItemType Directory -Path $dest -Force | Out-Null

@@ -28,7 +28,7 @@ param(
 if ($Delay -gt 0) { Start-Sleep -Seconds $Delay }
 
 $ErrorActionPreference = 'Continue'
-$repo = $PSScriptRoot
+$repo = Split-Path $PSScriptRoot -Parent   # scripts/ lives one level below the repo root
 
 function Say($msg, $colour = 'Gray') { Write-Host "  $msg" -ForegroundColor $colour }
 

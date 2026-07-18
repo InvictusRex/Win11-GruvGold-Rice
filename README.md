@@ -53,25 +53,27 @@ fully transparent, so only the centred buttons and tray float over the wallpaper
 
 ## Scripts
 
-Run in this order on a fresh machine:
+`install.ps1` sits at the repo root; everything else is in `scripts/`. Run in this
+order on a fresh machine, from the repo root:
 
 ```powershell
-.\backup.ps1      # restore point + registry/config backup   (run elevated for the restore point)
-.\install.ps1     # winget installs, idempotent
-.\apply.ps1       # deploy configs + Windows settings
-.\start.ps1       # bring the stack up
-.\start.ps1 -Autostart   # ...and register it to start at login
+.\scripts\backup.ps1      # restore point + registry/config backup   (run elevated for the restore point)
+.\install.ps1             # winget installs, idempotent
+.\scripts\apply.ps1       # deploy configs + Windows settings
+.\scripts\start.ps1       # bring the stack up
+.\scripts\start.ps1 -Autostart   # ...and register it to start at login
 ```
 
 Other switches:
 
 ```powershell
-.\start.ps1 -Stop          # stop everything
-.\start.ps1 -Restart
-.\start.ps1 -NoTiling      # everything except komorebi
-.\apply.ps1 -SkipSettings  # redeploy configs only
-.\uninstall.ps1            # full reversal
-.\uninstall.ps1 -RemovePackages   # ...and uninstall the apps
+.\scripts\start.ps1 -Stop          # stop everything
+.\scripts\start.ps1 -Restart
+.\scripts\start.ps1 -NoTiling      # everything except komorebi
+.\scripts\apply.ps1 -SkipSettings  # redeploy configs only
+.\scripts\exam-mode.ps1            # stop the rice for a proctored test (-Off to restore)
+.\scripts\uninstall.ps1            # full reversal
+.\scripts\uninstall.ps1 -RemovePackages   # ...and uninstall the apps
 ```
 
 ---

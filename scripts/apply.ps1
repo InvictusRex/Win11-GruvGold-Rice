@@ -23,7 +23,7 @@ param(
 )
 
 $ErrorActionPreference = 'Continue'
-$repo = $PSScriptRoot
+$repo = Split-Path $PSScriptRoot -Parent   # scripts/ lives one level below the repo root
 $cfg  = $repo   # component configs live in top-level folders (yasb/, komorebi/, ...)
 
 function Say($msg, $colour = 'Gray') { Write-Host "  $msg" -ForegroundColor $colour }
@@ -227,7 +227,7 @@ if (-not $SkipConfigs) {
                 $examDir = "$env:APPDATA\FlowLauncher\Plugins\ExamMode"
                 New-Item -ItemType Directory -Path $examDir -Force | Out-Null
                 Copy-Item (Join-Path $cfg 'flow-launcher\plugins\ExamMode\*') $examDir -Force
-                Join-Path $repo 'exam-mode.ps1' | Set-Content (Join-Path $examDir 'examscript.txt') -Encoding utf8 -NoNewline
+                Join-Path $PSScriptRoot 'exam-mode.ps1' | Set-Content (Join-Path $examDir 'examscript.txt') -Encoding utf8 -NoNewline
                 Say "installed exam: on/off launcher shortcut" 'Green'
             } else { Say "no Python found - skipped the exam: launcher shortcut" 'DarkYellow' }
             $fs | ConvertTo-Json -Depth 32 | Set-Content $flowMainSettings -Encoding utf8
@@ -396,7 +396,7 @@ $marker
     $examMarker = '# --- GruvGold exam mode ---'
     $examFn = @"
 $examMarker
-function exam: { & powershell.exe -NoProfile -ExecutionPolicy Bypass -File "$repo\exam-mode.ps1" `$(if ("`$args" -eq 'off') { '-Off' }) }
+function exam: { & powershell.exe -NoProfile -ExecutionPolicy Bypass -File "$PSScriptRoot\exam-mode.ps1" `$(if ("`$args" -eq 'off') { '-Off' }) }
 "@
     foreach ($p in @(
         "$env:USERPROFILE\Documents\PowerShell\Microsoft.PowerShell_profile.ps1",
@@ -507,5 +507,5 @@ public class GruvWallpaper {
     Say "done" 'Green'
 }
 
-Write-Host "`nApplied. Start the stack with:  .\start.ps1`n" -ForegroundColor Green
+Write-Host "`nApplied. Start the stack with:  .\scripts\start.ps1`n" -ForegroundColor Green
 exit 0

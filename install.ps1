@@ -88,7 +88,7 @@ foreach ($exe in 'komorebic', 'whkd', 'yasbc', 'fastfetch') {
 }
 if ($needsNewShell) {
     Write-Host "  Not yet on PATH in this shell: $($needsNewShell -join ', ')" -ForegroundColor DarkYellow
-    Write-Host "  That is expected right after install - open a new terminal before apply.ps1.`n" -ForegroundColor DarkYellow
+    Write-Host "  That is expected right after install - open a new terminal before scripts\apply.ps1.`n" -ForegroundColor DarkYellow
 }
 
 exit 0
