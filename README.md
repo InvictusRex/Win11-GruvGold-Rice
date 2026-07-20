@@ -12,7 +12,7 @@ toasts, jump lists and file dialogs. Worst-case reversal is stopping six process
 
 ## Palette
 
-Sampled from `references/obsidian_rice.png` rather than eyeballed. `palette.json` is the
+Sampled from `references/obsidian_rice.png` rather than eyeballed. `theme/palette.json` is the
 single source of truth.
 
 | Token | Hex | Role |
@@ -102,7 +102,7 @@ komorebi.
 ## Notable custom work
 
 - **Palette pipeline** — colors sampled directly from the reference screenshot rather
-  than eyeballed, then propagated to every component config from one `palette.json`.
+  than eyeballed, then propagated to every component config from one `theme/palette.json`.
 - **Win-key remap** — a solo `Win` tap opens Flow Launcher instead of Start, while every
   `Win+<key>` combo (E, R, L, arrows) still passes through untouched.
 - **Half-screen snapping via whkd + AHK**, replacing Aero Snap, because Windows' own

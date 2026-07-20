@@ -436,7 +436,7 @@ if (-not $SkipSettings) {
     Head 'Windows settings'
 
     # ---- wallpaper -------------------------------------------------------
-    $wall = Join-Path $repo 'references\wallpaper.png'
+    $wall = Join-Path $repo 'theme\wallpaper.png'
     if (Test-Path $wall) {
         Add-Type @'
 using System.Runtime.InteropServices;

@@ -304,7 +304,7 @@ widgets:
       sections:
         system_controls:
           profile_image_size: 36
-          profile_image_path: "E:/OPERA/Windows Rice/references/pfp.jpg"
+          profile_image_path: "E:/OPERA/Opus_18 - Win11 GruvGold Rice/theme/profile.png"
       callbacks:
         on_left: "toggle_menu"
 
@@ -335,7 +335,7 @@ widgets:
       animation_duration: 220
       button_row: 3
       profile_image_size: 140
-      profile_image_path: "E:/OPERA/Windows Rice/references/pfp.jpg"
+      profile_image_path: "E:/OPERA/Opus_18 - Win11 GruvGold Rice/theme/profile.png"
       menu_style: "fullscreen"
       buttons:
         restart:   ["", "Restart"]

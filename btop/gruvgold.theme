@@ -1,6 +1,6 @@
 #  GruvGold - btop theme
 #  Gruvbox Dark on a pure-black base with a gold accent.
-#  Keep in sync with palette.json at the repo root.
+#  Keep in sync with theme/palette.json.
 
 # Main background. Empty would mean "use terminal default"; we want true black.
 theme[main_bg]="#000000"

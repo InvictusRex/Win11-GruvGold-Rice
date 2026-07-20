@@ -1,7 +1,7 @@
 /*  YASB - GruvGold
  *
  *  Gruvbox Dark on a pure-black base, gold accent.
- *  Extracted from references/obsidian_rice.png - see palette.json.
+ *  Extracted from references/obsidian_rice.png - see theme/palette.json.
  *
  *  YASB styles with Qt's CSS subset, not real CSS: no custom properties,
  *  no :root, no calc(), no `auto` margins. Hex values are repeated literally.
