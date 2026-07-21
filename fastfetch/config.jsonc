@@ -5,7 +5,8 @@
     "type": "file",
     "source": "~/.config/fastfetch/dragon.txt",
     "color": { "1": "red" },
-    "padding": { "top": 1, "left": 4, "right": 3 }
+    // left 3 + the Terminal's one-cell left padding = 4 columns off the edge.
+    "padding": { "top": 1, "left": 3, "right": 3 }
   },
   "display": {
     "color": { "keys": "red", "title": "red" }
@@ -30,7 +31,7 @@
     { "type": "disk", "folders": ["C:\\", "D:\\", "E:\\"] },
     "localip",
     "break",
-    "colors",
-    "break"
+    // No trailing break: the prompt starts with its own blank line.
+    "colors"
   ]
 }

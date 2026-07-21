@@ -3,8 +3,11 @@
 # PowerShell rather than oh-my-posh: that cost ~400 ms at startup plus a
 # process spawn on every prompt.
 
+#    <blank line after the previous command's output>
 #    [invictus@TheKingslayer] C:\Users\TheKi
 #    >
+# No leading spaces: the Terminal profile's left padding indents the prompt
+# and native command output alike.
 function prompt {
     $ok  = $?
     $e   = [char]27
@@ -12,7 +15,7 @@ function prompt {
     $path = if ($loc.Provider.Name -eq 'FileSystem') { $loc.ProviderPath } else { $loc.Path }
     $Host.UI.RawUI.WindowTitle = '[invictus] ' + ($path -replace ('^' + [regex]::Escape($HOME) + '(?=\\|$)'), '~')
     $arrow = if ($ok) { '>' } else { "$e[31m>$e[39m" }
-    " [$e[32minvictus@$([System.Net.Dns]::GetHostName())$e[39m] $path`n $arrow "
+    "`n[$e[32minvictus@$([System.Net.Dns]::GetHostName())$e[39m] $path`n$arrow "
 }
 
 if ($env:WT_SESSION) {

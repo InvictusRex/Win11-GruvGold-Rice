@@ -314,7 +314,9 @@ if (-not $SkipConfigs) {
                 opacity      = 80
                 # The installed family is "JetBrainsMono NF", not "...Nerd Font".
                 font         = [pscustomobject]@{ face = 'JetBrainsMono NF'; size = 11 }
-                padding      = '0'
+                # Left only, ~one 11pt cell: the prompt and all command output
+                # sit one column off the window edge.
+                padding      = '9, 0, 0, 0'
 scrollbarState = 'hidden'
             }.GetEnumerator()) {
                 $d | Add-Member $kv.Key $kv.Value -Force
