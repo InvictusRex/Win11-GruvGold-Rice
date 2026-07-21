@@ -15,7 +15,30 @@ function prompt {
     $path = if ($loc.Provider.Name -eq 'FileSystem') { $loc.ProviderPath } else { $loc.Path }
     $Host.UI.RawUI.WindowTitle = '[invictus] ' + ($path -replace ('^' + [regex]::Escape($HOME) + '(?=\\|$)'), '~')
     $arrow = if ($ok) { '>' } else { "$e[31m>$e[39m" }
-    "`n[$e[32minvictus@$([System.Net.Dns]::GetHostName())$e[39m] $path`n$arrow "
+
+    # Exactly one blank line above the prompt. Errors and tables already end
+    # in blank lines, so reuse those rather than adding another.
+    $gap = "`n"
+    try {
+        $raw = $Host.UI.RawUI
+        $y = $raw.CursorPosition.Y
+        $w = $raw.BufferSize.Width - 1
+        $bg = $raw.BackgroundColor
+        $top = $y
+        # Blank = only spaces on the default background (fastfetch's colour
+        # palette is spaces on coloured backgrounds).
+        while ($top -gt 0 -and -not ($raw.GetBufferContents([Management.Automation.Host.Rectangle]::new(0, $top - 1, $w, $top - 1)) |
+                Where-Object { $_.Character -ne ' ' -or $_.BackgroundColor -ne $bg } | Select-Object -First 1)) { $top-- }
+        if ($top -lt $y) {
+            # Blank lines already there: sit right after the first one, or at
+            # the very top when everything above is blank (after cls).
+            $row = if ($top -eq 0) { 0 } else { $top + 1 }
+            $raw.CursorPosition = [Management.Automation.Host.Coordinates]::new(0, $row)
+            $gap = ''
+        } elseif ($y -eq 0) { $gap = '' }
+    } catch {}
+
+    "$gap[$e[32minvictus@$([System.Net.Dns]::GetHostName())$e[39m] $path`n$arrow "
 }
 
 if ($env:WT_SESSION) {
