@@ -72,6 +72,7 @@ Other switches:
 .\scripts\start.ps1 -NoTiling      # everything except komorebi
 .\scripts\apply.ps1 -SkipSettings  # redeploy configs only
 .\scripts\exam-mode.ps1            # stop the rice for a proctored test (-Off to restore)
+.\scripts\disable.ps1              # same as exam-mode: turn the rice off (-Off to bring it back)
 .\scripts\uninstall.ps1            # full reversal
 .\scripts\uninstall.ps1 -RemovePackages   # ...and uninstall the apps
 ```
