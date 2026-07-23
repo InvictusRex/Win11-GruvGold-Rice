@@ -41,6 +41,10 @@ function prompt {
     "$gap[$e[32minvictus@$([System.Net.Dns]::GetHostName())$e[39m] $path`n$arrow "
 }
 
+# "exam: on" / "exam: off" from any directory. Runs the copy apply.ps1
+# installed, so it keeps working if the repo clone is moved or deleted.
+function exam: { & powershell.exe -NoProfile -ExecutionPolicy Bypass -File "$env:LOCALAPPDATA\GruvGoldRice\scripts\exam-mode.ps1" $(if ("$args" -eq 'off') { '-Off' }) }
+
 if ($env:WT_SESSION) {
     # Typed text in the terminal's own off-white instead of per-token colours.
     $fg = "$([char]27)[39m"

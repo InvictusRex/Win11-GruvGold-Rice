@@ -79,6 +79,7 @@ $ourPaths = @(
     "$env:USERPROFILE\.config\komorebi"
     "$env:USERPROFILE\.config\whkdrc"
     "$env:APPDATA\FlowLauncher\Themes\GruvGold.xaml"
+    "$env:APPDATA\FlowLauncher\Plugins\ExamMode"
     "$env:LOCALAPPDATA\Microsoft\Windows Terminal\Fragments\GruvGold"
     "$env:USERPROFILE\Documents\Rainmeter\Skins\GruvGold"
     "$env:LOCALAPPDATA\GruvGoldRice"
@@ -97,6 +98,19 @@ foreach ($p in $ourPaths) {
             Remove-Item $p -Recurse -Force
             Say "removed  $p" 'Green'
         }
+    }
+}
+[Environment]::SetEnvironmentVariable('GRUVGOLD_NAME', $null, 'User')
+
+# The profiles dot-source the gruvgold.ps1 just removed; without a backup to
+# restore them from (step 4), every new shell would print an error.
+foreach ($p in "$env:USERPROFILE\Documents\PowerShell\Microsoft.PowerShell_profile.ps1",
+               "$env:USERPROFILE\Documents\WindowsPowerShell\Microsoft.PowerShell_profile.ps1") {
+    $text = Get-Content $p -Raw -ErrorAction SilentlyContinue
+    if ($text -match '# --- GruvGold (shell|exam mode) ---') {
+        $text = $text -replace '(?m)\r?\n?^# --- GruvGold (shell|exam mode) ---\r?\n[^\r\n]*', ''
+        [IO.File]::WriteAllText($p, $text.TrimEnd() + "`r`n", (New-Object System.Text.UTF8Encoding $true))
+        Say "removed GruvGold lines from $(Split-Path $p -Leaf)" 'Green'
     }
 }
 

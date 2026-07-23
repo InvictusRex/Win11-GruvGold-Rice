@@ -209,10 +209,14 @@ if ($Autostart) {
     $shell   = New-Object -ComObject WScript.Shell
     $pwsh    = (Get-Command powershell.exe).Source
 
+    # The copy apply.ps1 installed, not this file: the repo clone may move.
+    $installed = "$env:LOCALAPPDATA\GruvGoldRice\scripts\start.ps1"
+    if (-not (Test-Path $installed)) { Say 'start.ps1 not installed yet - run apply.ps1 first' 'Red'; exit 1 }
+
     Get-ChildItem (Join-Path $startup 'GruvGold - *.lnk') -ErrorAction SilentlyContinue |
         Remove-Item -Force -ErrorAction SilentlyContinue
 
-    $args = "-WindowStyle Hidden -ExecutionPolicy Bypass -File `"$PSCommandPath`" -Delay 5"
+    $args = "-WindowStyle Hidden -ExecutionPolicy Bypass -File `"$installed`" -Delay 5"
     if ($NoTiling) { $args += ' -NoTiling' }
 
     $lnk = $shell.CreateShortcut((Join-Path $startup 'GruvGold - Startup.lnk'))

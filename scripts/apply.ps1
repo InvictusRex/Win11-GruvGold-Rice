@@ -8,8 +8,11 @@
     Everything here is reversible by uninstall.ps1. Nothing patches a system
     file, replaces the shell, or injects into a process.
 
-    Config deployment uses a symlink when Developer Mode is on (so editing the
-    repo edits the live config), and falls back to a plain copy otherwise.
+    Everything is copied, never linked: the clone is only the source. Editing
+    it changes nothing until this is re-run, and the rice keeps working if the
+    clone is moved or deleted (keep its backup\ folder for uninstall.ps1).
+    Scripts the rice runs later (autostart, exam mode) and the theme images
+    are installed to %LOCALAPPDATA%\GruvGoldRice for the same reason.
 
     Parameters:
       -SkipSettings   only deploy config files, change no Windows settings
@@ -25,14 +28,12 @@ param(
 $ErrorActionPreference = 'Continue'
 $repo = Split-Path $PSScriptRoot -Parent   # scripts/ lives one level below the repo root
 $cfg  = $repo   # component configs live in top-level folders (yasb/, komorebi/, ...)
+$live = "$env:LOCALAPPDATA\GruvGoldRice"   # installed scripts and theme images
 
 function Say($msg, $colour = 'Gray') { Write-Host "  $msg" -ForegroundColor $colour }
 function Head($msg) { Write-Host "`n$msg" -ForegroundColor Yellow }
 
-$script:DevMode = (Get-ItemProperty 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\AppModelUnlock' -Name AllowDevelopmentWithoutDevLicense -ErrorAction SilentlyContinue).AllowDevelopmentWithoutDevLicense -eq 1
-
-# Deploy a file or directory from the repo to its live location.
-# Symlink if we can (edits in the repo go live immediately), copy if we cannot.
+# Copy a file or directory from the repo to its live location.
 function Deploy($source, $target) {
     if (-not (Test-Path $source)) { Say "MISSING source: $source" 'Red'; return }
 
@@ -40,27 +41,18 @@ function Deploy($source, $target) {
     if ($parent -and -not (Test-Path $parent)) { New-Item -ItemType Directory -Path $parent -Force | Out-Null }
 
     if (Test-Path $target) {
+        # Older versions symlinked into the repo; delete such a link itself,
+        # never recurse through it into the repo.
         $existing = Get-Item $target -Force
         if ($existing.LinkType -eq 'SymbolicLink') { $existing.Delete() }
         else { Remove-Item $target -Recurse -Force }
     }
 
-    $name = Split-Path $target -Leaf
-    if ($script:DevMode) {
-        try {
-            New-Item -ItemType SymbolicLink -Path $target -Target $source -ErrorAction Stop | Out-Null
-            Say "linked  $name" 'Green'
-            return
-        } catch {
-            # fall through to copy
-        }
-    }
     Copy-Item $source $target -Recurse -Force
-    Say "copied  $name" 'Green'
+    Say "copied  $(Split-Path $target -Leaf)" 'Green'
 }
 
 Write-Host "`nApplying GruvGold" -ForegroundColor Cyan
-Say ("config deployment: " + $(if ($script:DevMode) { 'symlink (Developer Mode on)' } else { 'copy (Developer Mode off)' })) 'DarkGray'
 
 # ================================================================= configs
 if (-not $SkipConfigs) {
@@ -68,6 +60,11 @@ if (-not $SkipConfigs) {
     Head '[1/11] YASB'
     Deploy (Join-Path $cfg 'yasb\config.yaml') "$env:USERPROFILE\.config\yasb\config.yaml"
     Deploy (Join-Path $cfg 'yasb\styles.css') "$env:USERPROFILE\.config\yasb\styles.css"
+    # The power menu's profile picture needs an absolute path.
+    Deploy (Join-Path $repo 'theme\profile.png') "$live\theme\profile.png"
+    $yasbCfg = "$env:USERPROFILE\.config\yasb\config.yaml"
+    $yaml = (Get-Content $yasbCfg -Raw -Encoding UTF8) -replace '(?m)^(\s*profile_image_path:)[^\r\n]*', ('$1 "' + ($live -replace '\\', '/') + '/theme/profile.png"')
+    [IO.File]::WriteAllText($yasbCfg, $yaml, (New-Object System.Text.UTF8Encoding $false))
 
     # Without a settings.json TranslucentTB treats every launch as a first run and
     # pops its welcome dialog at boot. Only seed it - never overwrite the user's own.
@@ -227,7 +224,7 @@ if (-not $SkipConfigs) {
                 $examDir = "$env:APPDATA\FlowLauncher\Plugins\ExamMode"
                 New-Item -ItemType Directory -Path $examDir -Force | Out-Null
                 Copy-Item (Join-Path $cfg 'flow-launcher\plugins\ExamMode\*') $examDir -Force
-                Join-Path $PSScriptRoot 'exam-mode.ps1' | Set-Content (Join-Path $examDir 'examscript.txt') -Encoding utf8 -NoNewline
+                "$live\scripts\exam-mode.ps1" | Set-Content (Join-Path $examDir 'examscript.txt') -Encoding utf8 -NoNewline
                 Say "installed exam: on/off launcher shortcut" 'Green'
             } else { Say "no Python found - skipped the exam: launcher shortcut" 'DarkYellow' }
             $fs | ConvertTo-Json -Depth 32 | Set-Content $flowMainSettings -Encoding utf8
@@ -365,8 +362,8 @@ scrollbarState = 'hidden'
     Deploy (Join-Path $cfg 'fastfetch') "$env:USERPROFILE\.config\fastfetch"
 
     # Append to the profile rather than overwrite it, and only once. Earlier
-    # versions added an oh-my-posh block and a separate greeting block; both
-    # are superseded by gruvgold.ps1, so strip them (marker through closing brace).
+    # versions added an oh-my-posh block, a greeting block and an exam: block;
+    # all are superseded by gruvgold.ps1, so strip them.
     $marker = '# --- GruvGold shell ---'
     $init   = @"
 $marker
@@ -379,34 +376,19 @@ $marker
         New-Item -ItemType Directory -Path (Split-Path $p) -Force | Out-Null
         if (-not (Test-Path $p)) { New-Item -ItemType File -Path $p -Force | Out-Null }
         $text = Get-Content $p -Raw -ErrorAction SilentlyContinue
-        if ($text -match '# --- GruvGold (prompt|greeting) ---') {
-            $text = $text -replace '(?ms)\r?\n?^# --- GruvGold (prompt|greeting) ---\r?\n.*?^\}[^\r\n]*', ''
+        if ($text -match '# --- GruvGold (prompt|greeting|exam mode) ---') {
+            # prompt/greeting: marker through closing brace; exam mode: marker + one line.
+            $text = $text -replace '(?ms)\r?\n?^# --- GruvGold (prompt|greeting) ---\r?\n.*?^\}[^\r\n]*', '' `
+                          -replace '(?m)\r?\n?^# --- GruvGold exam mode ---\r?\n[^\r\n]*', ''
             # UTF-8 with BOM: the one encoding both PowerShell 5.1 and 7 read correctly.
             [IO.File]::WriteAllText($p, $text.TrimEnd() + "`r`n", (New-Object System.Text.UTF8Encoding $true))
-            Say "removed old oh-my-posh/greeting blocks from $(Split-Path $p -Leaf)" 'Green'
+            Say "removed old oh-my-posh/greeting/exam blocks from $(Split-Path $p -Leaf)" 'Green'
         }
         if ($text -match [regex]::Escape($marker)) {
             Say "shell already in $(Split-Path $p -Leaf)" 'DarkGray'
         } else {
             Add-Content $p "`n$init"
             Say "added shell to $(Split-Path $p -Leaf)" 'Green'
-        }
-    }
-
-    # "exam: on" / "exam: off" from any PowerShell, whatever the working directory.
-    # The repo path is baked in at apply time.
-    $examMarker = '# --- GruvGold exam mode ---'
-    $examFn = @"
-$examMarker
-function exam: { & powershell.exe -NoProfile -ExecutionPolicy Bypass -File "$PSScriptRoot\exam-mode.ps1" `$(if ("`$args" -eq 'off') { '-Off' }) }
-"@
-    foreach ($p in @(
-        "$env:USERPROFILE\Documents\PowerShell\Microsoft.PowerShell_profile.ps1",
-        "$env:USERPROFILE\Documents\WindowsPowerShell\Microsoft.PowerShell_profile.ps1"
-    )) {
-        if (-not ((Get-Content $p -Raw -ErrorAction SilentlyContinue) -match [regex]::Escape($examMarker))) {
-            Add-Content $p "`n$examFn"
-            Say "added exam: function to $(Split-Path $p -Leaf)" 'Green'
         }
     }
 
@@ -424,12 +406,16 @@ function exam: { & powershell.exe -NoProfile -ExecutionPolicy Bypass -File "$PSS
     Head '[10/11] Rainmeter skins'
     Deploy (Join-Path $cfg 'rainmeter\Skins\GruvGold') "$env:USERPROFILE\Documents\Rainmeter\Skins\GruvGold"
 
-    Head '[11/11] AutoHotkey scripts'
-    Deploy (Join-Path $cfg 'ahk\desktop-type-to-launch.ahk') "$env:LOCALAPPDATA\GruvGoldRice\desktop-type-to-launch.ahk"
+    Head '[11/11] AutoHotkey + rice scripts'
+    Deploy (Join-Path $cfg 'ahk\desktop-type-to-launch.ahk') "$live\desktop-type-to-launch.ahk"
     # Invoked per keypress by whkdrc for Win+Up / Win+Down / Win+Left / Win+Right, not run resident.
-    Deploy (Join-Path $cfg 'ahk\snap-half.ahk') "$env:LOCALAPPDATA\GruvGoldRice\snap-half.ahk"
+    Deploy (Join-Path $cfg 'ahk\snap-half.ahk') "$live\snap-half.ahk"
     # Invoked per keypress by whkdrc for Win+D, not run resident.
-    Deploy (Join-Path $cfg 'ahk\toggle-desktop.ahk') "$env:LOCALAPPDATA\GruvGoldRice\toggle-desktop.ahk"
+    Deploy (Join-Path $cfg 'ahk\toggle-desktop.ahk') "$live\toggle-desktop.ahk"
+    # Run later by the autostart shortcut, exam: and the Flow ExamMode plugin.
+    # exam-mode.ps1 finds start.ps1 through scripts\, as it does in the repo.
+    Deploy (Join-Path $PSScriptRoot 'start.ps1')     "$live\scripts\start.ps1"
+    Deploy (Join-Path $PSScriptRoot 'exam-mode.ps1') "$live\scripts\exam-mode.ps1"
 }
 
 # ================================================================= settings
@@ -438,7 +424,9 @@ if (-not $SkipSettings) {
     Head 'Windows settings'
 
     # ---- wallpaper -------------------------------------------------------
-    $wall = Join-Path $repo 'theme\wallpaper.png'
+    # From the installed copy: the lock screen reads the file by path.
+    $wall = "$live\theme\wallpaper.png"
+    Deploy (Join-Path $repo 'theme\wallpaper.png') $wall
     if (Test-Path $wall) {
         Add-Type @'
 using System.Runtime.InteropServices;
