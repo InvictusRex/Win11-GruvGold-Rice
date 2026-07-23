@@ -15,7 +15,8 @@
     // Blank first line; with the logo's top padding of 1 the whole block
     // (art + details) starts one line down and stays aligned.
     "break",
-    { "type": "title", "format": "{#keys}invictus@{host-name}" },
+    // apply.ps1 swaps {user-name} for the name given with -Name.
+    { "type": "title", "format": "{#keys}{user-name}@{host-name}" },
     "separator",
     "os",
     "host",
@@ -26,9 +27,9 @@
     "gpu",
     "memory",
     "swap",
-    // Explicit list: auto-detection also probes the mapped NAS shares (W:-Z:),
-    // which stall ~21s each start when they are disconnected.
-    { "type": "disk", "folders": ["C:\\", "D:\\", "E:\\"] },
+    // apply.ps1 fills in this machine's local drives. Auto-detection also probes
+    // mapped network shares and stalls 20s+ while one is disconnected.
+    { "type": "disk", "folders": ["C:\\"] },
     "localip",
     "break",
     // No trailing break: the prompt starts with its own blank line.

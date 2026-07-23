@@ -4,8 +4,9 @@
 # process spawn on every prompt.
 
 #    <blank line after the previous command's output>
-#    [invictus@TheKingslayer] C:\Users\TheKi
+#    [name@HOST] C:\Users\you
 #    >
+# name is GRUVGOLD_NAME (set by apply.ps1 -Name), else the Windows user name.
 # No leading spaces: the Terminal profile's left padding indents the prompt
 # and native command output alike.
 function prompt {
@@ -13,7 +14,8 @@ function prompt {
     $e   = [char]27
     $loc = $executionContext.SessionState.Path.CurrentLocation
     $path = if ($loc.Provider.Name -eq 'FileSystem') { $loc.ProviderPath } else { $loc.Path }
-    $Host.UI.RawUI.WindowTitle = '[invictus] ' + ($path -replace ('^' + [regex]::Escape($HOME) + '(?=\\|$)'), '~')
+    $name = if ($env:GRUVGOLD_NAME) { $env:GRUVGOLD_NAME } else { $env:USERNAME }
+    $Host.UI.RawUI.WindowTitle = "[$name] " + ($path -replace ('^' + [regex]::Escape($HOME) + '(?=\\|$)'), '~')
     $arrow = if ($ok) { '>' } else { "$e[31m>$e[39m" }
 
     # Exactly one blank line above the prompt. Errors and tables already end
@@ -38,7 +40,7 @@ function prompt {
         } elseif ($y -eq 0) { $gap = '' }
     } catch {}
 
-    "$gap[$e[32minvictus@$([System.Net.Dns]::GetHostName())$e[39m] $path`n$arrow "
+    "$gap[$e[32m$name@$([System.Net.Dns]::GetHostName())$e[39m] $path`n$arrow "
 }
 
 # "exam: on" / "exam: off" from any directory. Runs the copy apply.ps1

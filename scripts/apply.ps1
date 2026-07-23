@@ -17,12 +17,15 @@
     Parameters:
       -SkipSettings   only deploy config files, change no Windows settings
       -SkipConfigs    only change Windows settings
+      -Name <name>    name shown in the prompt and fastfetch title (default: your
+                      Windows user name). Remembered for later runs.
 #>
 
 [CmdletBinding()]
 param(
     [switch]$SkipSettings,
-    [switch]$SkipConfigs
+    [switch]$SkipConfigs,
+    [string]$Name
 )
 
 $ErrorActionPreference = 'Continue'
@@ -360,6 +363,21 @@ scrollbarState = 'hidden'
     Head '[8/11] PowerShell prompt + fastfetch greeting'
     Deploy (Join-Path $cfg 'powershell\gruvgold.ps1') "$env:USERPROFILE\.config\powershell\gruvgold.ps1"
     Deploy (Join-Path $cfg 'fastfetch') "$env:USERPROFILE\.config\fastfetch"
+
+    # -Name sticks: GRUVGOLD_NAME feeds the prompt and later runs of this script.
+    if ($Name) {
+        [Environment]::SetEnvironmentVariable('GRUVGOLD_NAME', $Name, 'User')
+        $env:GRUVGOLD_NAME = $Name
+    } else { $Name = [Environment]::GetEnvironmentVariable('GRUVGOLD_NAME', 'User') }
+
+    # fastfetch reads no environment variables, so the name and this machine's
+    # local drives are baked into its copy.
+    $ffCfg = "$env:USERPROFILE\.config\fastfetch\config.jsonc"
+    $disks = @((Get-CimInstance Win32_LogicalDisk -Filter 'DriveType=3').DeviceID | ForEach-Object { "`"$_\\`"" }) -join ', '
+    $ff = (Get-Content $ffCfg -Raw -Encoding UTF8) -replace '"folders":\s*\[[^\]]*\]', "`"folders`": [$disks]"
+    if ($Name) { $ff = $ff.Replace('{user-name}', $Name) }
+    [IO.File]::WriteAllText($ffCfg, $ff, (New-Object System.Text.UTF8Encoding $false))
+    Say "fastfetch: name $(if ($Name) { $Name } else { $env:USERNAME }), drives $disks" 'Green'
 
     # Append to the profile rather than overwrite it, and only once. Earlier
     # versions added an oh-my-posh block, a greeting block and an exam: block;
