@@ -7,12 +7,15 @@
     By default this restores your desktop but LEAVES the applications installed
     (they are harmless when not running). Pass -RemovePackages to winget-uninstall
     them too - anything that was already on the machine before backup.ps1 ran is
-    never touched, per backup\<stamp>\preinstalled.json.
+    never touched, per <backup>\<stamp>\preinstalled.json.
+
+    Backups are read from %LOCALAPPDATA%\GruvGoldRice-backup (see backup.ps1)
+    and left in place afterwards.
 
     Usage:
-      .\uninstall.ps1                    # stop + unlink + restore settings
+      .\uninstall.ps1                    # stop + remove configs + restore settings
       .\uninstall.ps1 -RemovePackages    # the above, plus uninstall the apps
-      .\uninstall.ps1 -From 20260926-1200  # restore from a specific backup
+      .\uninstall.ps1 -From 20260926-120000  # restore from a specific backup
 #>
 
 [CmdletBinding()]
@@ -22,17 +25,17 @@ param(
 )
 
 $ErrorActionPreference = 'Continue'
-$repo = Split-Path $PSScriptRoot -Parent   # backups live in backup/ at the repo root
+$backups = "$env:LOCALAPPDATA\GruvGoldRice-backup"   # written by backup.ps1
 
 function Say($msg, $colour = 'Gray') { Write-Host "  $msg" -ForegroundColor $colour }
 
 # ---------------------------------------------------------------- locate backup
-$latestFile = Join-Path $repo 'backup\LATEST'
+$latestFile = Join-Path $backups 'LATEST'
 if (-not $From -and (Test-Path $latestFile)) { $From = (Get-Content $latestFile -Raw).Trim() }
-$src = if ($From) { Join-Path $repo "backup\$From" } else { $null }
+$src = if ($From) { Join-Path $backups $From } else { $null }
 
 if ($src -and (Test-Path $src)) {
-    Write-Host "`nRestoring from backup\$From" -ForegroundColor Cyan
+    Write-Host "`nRestoring from $src" -ForegroundColor Cyan
 } else {
     Write-Host "`nNo backup found - will stop processes and unlink configs," -ForegroundColor Yellow
     Write-Host "but cannot restore your original wallpaper/taskbar settings.`n" -ForegroundColor Yellow

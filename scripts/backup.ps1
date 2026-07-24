@@ -8,7 +8,10 @@
       3. Existing config files we might overwrite.
       4. The current wallpaper path and taskbar settings, as plain text.
 
-    Safe to run repeatedly; each run lands in its own timestamped folder.
+    Safe to run repeatedly; each run lands in its own timestamped folder under
+    %LOCALAPPDATA%\GruvGoldRice-backup. That is outside the repo clone, so
+    deleting or re-cloning the repo never loses it, and outside the rice's own
+    folder, which uninstall.ps1 deletes.
 #>
 
 [CmdletBinding()]
@@ -17,13 +20,13 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
-$repo  = Split-Path $PSScriptRoot -Parent   # backups go to backup/ at the repo root
+$root  = "$env:LOCALAPPDATA\GruvGoldRice-backup"
 $stamp = Get-Date -Format 'yyyyMMdd-HHmmss'
-$dest  = Join-Path $repo "backup\$stamp"
+$dest  = Join-Path $root $stamp
 New-Item -ItemType Directory -Path $dest -Force | Out-Null
 
 function Say($msg, $colour = 'Gray') { Write-Host "  $msg" -ForegroundColor $colour }
-Write-Host "`nBacking up to backup\$stamp" -ForegroundColor Cyan
+Write-Host "`nBacking up to $dest" -ForegroundColor Cyan
 
 # ---------------------------------------------------------------- 1. restore point
 # System Protection is off by default on many Windows 11 installs, and Windows
@@ -136,7 +139,7 @@ $state.GetEnumerator() | ForEach-Object { Say ("{0,-22} {1}" -f $_.Key, $_.Value
 
 # Record which of our packages were ALREADY installed, so uninstall.ps1 never
 # removes something the user had before the rice.
-$ours = @('AmN.yasb','LGUG2Z.komorebi','LGUG2Z.whkd','Flow-Launcher.Flow-Launcher',
+$ours = @('AmN.yasb','LGUG2Z.komorebi','LGUG2Z.whkd','LGUG2Z.masir','Flow-Launcher.Flow-Launcher',
           'Rainmeter.Rainmeter','CharlesMilette.TranslucentTB','AutoHotkey.AutoHotkey',
           'JanDeDobbeleer.OhMyPosh','Microsoft.PowerShell','aristocratos.btop4win',
           'voidtools.Everything','Fastfetch-cli.Fastfetch')
@@ -149,7 +152,7 @@ ConvertTo-Json @($installed) | Set-Content (Join-Path $dest 'preinstalled.json')
 Say "pre-existing packages: $(if ($installed) { $installed -join ', ' } else { 'none' })" 'Cyan'
 
 # Point uninstall.ps1 at the newest backup.
-Set-Content (Join-Path $repo 'backup\LATEST') $stamp -Encoding utf8
+Set-Content (Join-Path $root 'LATEST') $stamp -Encoding utf8
 
-Write-Host "`nDone. backup\$stamp`n" -ForegroundColor Green
+Write-Host "`nDone. $dest`n" -ForegroundColor Green
 exit 0   # winget list sets a non-zero code for "not installed"; that is not our failure

@@ -10,7 +10,7 @@
 
     Everything is copied, never linked: the clone is only the source. Editing
     it changes nothing until this is re-run, and the rice keeps working if the
-    clone is moved or deleted (keep its backup\ folder for uninstall.ps1).
+    clone is moved or deleted.
     Scripts the rice runs later (autostart, exam mode) and the theme images
     are installed to %LOCALAPPDATA%\GruvGoldRice for the same reason.
 
