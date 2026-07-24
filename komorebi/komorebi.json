@@ -66,9 +66,9 @@
     { "kind": "Path", "id": "C:\\Program Files (x86)\\Steam\\Steam.exe", "matching_strategy": "Equals" },
     { "kind": "Path", "id": "C:\\Program Files (x86)\\Epic Games\\Launcher\\Portal\\Binaries\\Win32\\EpicGamesLauncher.exe", "matching_strategy": "Equals" },
     { "kind": "Path", "id": "C:\\Program Files (x86)\\Ubisoft\\Ubisoft Game Launcher\\UbisoftConnect.exe", "matching_strategy": "Equals" },
-    { "kind": "Path", "id": "E:\\Riot Games\\Riot Client\\RiotClientServices.exe", "matching_strategy": "Equals" },
-    { "kind": "Path", "id": "C:\\Users\\TheKi\\AppData\\Roaming\\.minecraft\\TLauncher.exe", "matching_strategy": "Equals" },
-    { "kind": "Path", "id": "C:\\Users\\TheKi\\AppData\\Local\\Programs\\Paradox Interactive\\launcher\\bootstrapper-v2.exe", "matching_strategy": "Equals" }
+    { "kind": "Exe", "id": "RiotClientServices.exe", "matching_strategy": "Equals" },
+    { "kind": "Exe", "id": "TLauncher.exe", "matching_strategy": "Equals" },
+    { "kind": "Exe", "id": "bootstrapper-v2.exe", "matching_strategy": "Equals" }
   ],
 
   "floating_applications": [

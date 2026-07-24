@@ -171,7 +171,12 @@ if (-not $NoTiling) {
                 & $bin.komorebic ignore-rule path "C:\Program Files (x86)\Steam\Steam.exe" 2>&1 | Out-Null
                 & $bin.komorebic ignore-rule path "C:\Program Files (x86)\Epic Games\Launcher\Portal\Binaries\Win32\EpicGamesLauncher.exe" 2>&1 | Out-Null
                 & $bin.komorebic ignore-rule path "C:\Program Files (x86)\Ubisoft\Ubisoft Game Launcher\UbisoftConnect.exe" 2>&1 | Out-Null
-                & $bin.komorebic ignore-rule path "E:\Riot Games\Riot Client\RiotClientServices.exe" 2>&1 | Out-Null
+                # Riot installs wherever the user picked; its client records the path.
+                $riotInstalls = "$env:ProgramData\Riot Games\RiotClientInstalls.json"
+                if (Test-Path $riotInstalls) {
+                    $riot = (Get-Content $riotInstalls -Raw | ConvertFrom-Json).rc_default
+                    if ($riot) { & $bin.komorebic ignore-rule path ($riot -replace '/', '\') 2>&1 | Out-Null }
+                }
                 & $bin.komorebic ignore-rule path "$env:USERPROFILE\AppData\Roaming\.minecraft\TLauncher.exe" 2>&1 | Out-Null
                 & $bin.komorebic ignore-rule path "$env:LOCALAPPDATA\Programs\Paradox Interactive\launcher\bootstrapper-v2.exe" 2>&1 | Out-Null
                 & $bin.komorebic retile 2>&1 | Out-Null   # release any of the above already open at startup
