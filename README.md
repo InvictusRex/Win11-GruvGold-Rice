@@ -53,16 +53,32 @@ fully transparent, so only the centred buttons and tray float over the wallpaper
 
 ## Scripts
 
-`install.ps1` sits at the repo root; everything else is in `scripts/`. Run in this
-order on a fresh machine, from the repo root:
+`install.ps1` sits at the repo root; everything else is in `scripts/`. Clone the repo
+anywhere, then run in this order from the repo root:
 
 ```powershell
+git clone https://github.com/InvictusRex/Win11-GruvGold-Rice.git
+cd Win11-GruvGold-Rice
 .\scripts\backup.ps1      # restore point + registry/config backup   (run elevated for the restore point)
 .\install.ps1             # winget installs, idempotent
 .\scripts\apply.ps1       # deploy configs + Windows settings
 .\scripts\start.ps1       # bring the stack up
 .\scripts\start.ps1 -Autostart   # ...and register it to start at login
 ```
+
+If scripts are blocked, allow them for the session first:
+`Set-ExecutionPolicy -Scope Process Bypass`.
+
+The clone is only the source. `apply.ps1` copies every config to where its app reads
+it, and installs the scripts the rice runs later (autostart, `exam:`) plus the theme
+images to `%LOCALAPPDATA%\GruvGoldRice`. Editing the clone changes nothing until
+`apply.ps1` is re-run, and the rice keeps working if the clone is moved. Keep the
+clone's `backup\` folder though: `uninstall.ps1` restores your original settings
+from it.
+
+The prompt and fastfetch title show `name@HOST`, where the name defaults to your Windows
+user name. `.\scripts\apply.ps1 -Name <name>` sets a different one; it is remembered
+for later runs.
 
 Other switches:
 
