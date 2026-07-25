@@ -4,7 +4,7 @@
     xmlns:system="clr-namespace:System;assembly=mscorlib">
 
     <!--  GruvGold - Gruvbox Dark on pure black with a gold accent.
-          Palette matches references/obsidian_rice.png; see theme/palette.json.
+          Palette: see theme/palette.json.
             bg_alt #0D0C09   bg_elev #16130D   border #282421
             fg     #FBF1C7   fg_dim  #BDAE93   fg_muted #7C6F64
             gold   #D5AC45                                                -->

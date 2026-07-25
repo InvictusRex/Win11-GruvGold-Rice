@@ -1,6 +1,6 @@
 {
   "name": "GruvGold",
-  "description": "Gruvbox Dark forced to a pure-black base, gold accent. Extracted from references/obsidian_rice.png.",
+  "description": "Gruvbox Dark forced to a pure-black base, gold accent. Sampled from an Obsidian theme screenshot.",
   "core": {
     "bg":       "#000000",
     "bg_alt":   "#0D0C09",

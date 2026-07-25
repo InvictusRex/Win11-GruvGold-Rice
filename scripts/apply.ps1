@@ -114,7 +114,7 @@ if (-not $SkipConfigs) {
                 $fs = Get-Content $flowSettings -Raw | ConvertFrom-Json
                 $fs | Add-Member Theme 'GruvGold' -Force
                 # Typing on the desktop should fall through to a web search when
-                # nothing matches - the "Search Google" row in reference_1.
+                # nothing matches, via the "Search Google" row.
                 $fs | Add-Member ShouldUsePinyin $false -Force
                 # WindowSize is in LOGICAL pixels and 'Center' centres correctly, so
                 # leave the alignment alone and just widen it. 1000 of the 1707px
@@ -485,7 +485,7 @@ public class GruvWallpaper {
 
     # ---- taskbar ---------------------------------------------------------
     # Centred, with labels always shown: this is what produces the labelled
-    # buttons in reference_2.png. TranslucentTB then removes the background.
+    # taskbar buttons. TranslucentTB then removes the background.
     $adv = 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced'
     New-ItemProperty $adv -Name TaskbarAl          -Value 1 -PropertyType DWord -Force | Out-Null
     New-ItemProperty $adv -Name TaskbarGlomLevel   -Value 2 -PropertyType DWord -Force | Out-Null

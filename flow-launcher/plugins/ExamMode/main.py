@@ -6,7 +6,7 @@ import sys
 HERE = os.path.dirname(os.path.abspath(__file__))
 ICON = os.path.join(HERE, "icon.png")
 
-# apply.ps1 writes the repo's exam-mode.ps1 path here.
+# apply.ps1 writes the path of the installed exam-mode.ps1 here.
 with open(os.path.join(HERE, "examscript.txt"), encoding="utf-8-sig") as f:
     SCRIPT = f.read().strip()
 

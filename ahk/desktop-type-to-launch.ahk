@@ -4,7 +4,7 @@
 ; desktop-type-to-launch.ahk
 ;
 ; Start typing while the desktop has focus and Flow Launcher opens, pre-filled
-; with what you typed - the behaviour from reference_1.png.
+; with what you typed.
 ;
 ; The hotkeys are registered under a HotIf criterion, so a-z and 0-9 are only
 ; intercepted when the foreground window is the desktop itself. Everywhere else

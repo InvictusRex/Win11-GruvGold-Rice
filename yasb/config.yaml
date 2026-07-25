@@ -1,6 +1,6 @@
 # YASB - GruvGold
 #
-# The bottom bar in reference_2.png is the NATIVE Windows taskbar made transparent
+# The bottom bar is the NATIVE Windows taskbar made transparent
 # by TranslucentTB, not a YASB bar - that is why the tray and notification bell
 # still work. This config deliberately does NOT use YASB's systray/taskbar widgets:
 # two trays competing for the same "TaskbarCreated" broadcast is a known upstream
@@ -323,7 +323,7 @@ widgets:
         on_left: "open_bin"
         on_right: "toggle_label"
 
-  # Fullscreen session overlay - reference_4.png. Styling is in styles.css.
+  # Fullscreen session overlay. Styling is in styles.css.
   power_menu:
     type: "yasb.power_menu.PowerMenuWidget"
     options:
