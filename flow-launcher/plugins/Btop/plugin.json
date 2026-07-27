@@ -1,0 +1,12 @@
+{
+  "ID": "6B1E0C5A3F2D4E8A9C7D1B4F5A6E2D93",
+  "ActionKeyword": "btop",
+  "Name": "btop",
+  "Description": "Open the btop system monitor in a new terminal",
+  "Author": "local",
+  "Version": "1.0.0",
+  "Language": "python",
+  "Website": "",
+  "IcoPath": "icon.png",
+  "ExecuteFileName": "main.py"
+}

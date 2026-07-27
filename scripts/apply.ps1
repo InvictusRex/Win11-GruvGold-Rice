@@ -229,6 +229,15 @@ if (-not $SkipConfigs) {
                 Copy-Item (Join-Path $cfg 'flow-launcher\plugins\ExamMode\*') $examDir -Force
                 "$live\scripts\exam-mode.ps1" | Set-Content (Join-Path $examDir 'examscript.txt') -Encoding utf8 -NoNewline
                 Say "installed exam: on/off launcher shortcut" 'Green'
+                # "btop" launcher entry (flow-launcher/plugins/Btop): opens btop4win in a new terminal.
+                $btopDir = "$env:APPDATA\FlowLauncher\Plugins\Btop"
+                $btopBin = (Get-Command btop4win -ErrorAction SilentlyContinue | Select-Object -First 1).Source
+                if ($btopBin) {
+                    New-Item -ItemType Directory -Path $btopDir -Force | Out-Null
+                    Copy-Item (Join-Path $cfg 'flow-launcher\plugins\Btop\*') $btopDir -Force
+                    Set-Content (Join-Path $btopDir 'btoppath.txt') $btopBin -Encoding utf8 -NoNewline
+                    Say "installed btop launcher entry" 'Green'
+                } else { Say "btop4win not found - skipped the btop launcher entry" 'DarkYellow' }
             } else { Say "no Python found - skipped the exam: launcher shortcut" 'DarkYellow' }
             $fs | ConvertTo-Json -Depth 32 | Set-Content $flowMainSettings -Encoding utf8
 
