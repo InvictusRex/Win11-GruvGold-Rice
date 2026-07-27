@@ -62,3 +62,5 @@ if ($env:WT_SESSION) {
         fastfetch
     }
 }
+
+Set-Alias btop btop4win

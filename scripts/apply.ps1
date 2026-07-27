@@ -410,7 +410,7 @@ $marker
         }
     }
 
-    Head '[9/11] btop theme'
+    Head '[9/11] btop theme and config'
     Deploy (Join-Path $cfg 'btop\gruvgold.theme') "$env:USERPROFILE\.config\btop\themes\gruvgold.theme"
     # btop4win also looks next to its own binary.
     $btopExe = (Get-Command btop4win, btop -ErrorAction SilentlyContinue | Select-Object -First 1).Source
@@ -419,6 +419,8 @@ $marker
         New-Item -ItemType Directory -Path $btopThemes -Force | Out-Null
         Copy-Item (Join-Path $cfg 'btop\gruvgold.theme') (Join-Path $btopThemes 'gruvgold.theme') -Force
         Say "copied theme beside btop binary" 'Green'
+        # btop rewrites its config on exit, so this is the full file, not a patch.
+        Deploy (Join-Path $cfg 'btop\btop.conf') (Join-Path (Split-Path $btopExe) 'btop.conf')
     }
 
     Head '[10/11] Rainmeter skins'
