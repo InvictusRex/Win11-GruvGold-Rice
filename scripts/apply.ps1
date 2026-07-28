@@ -509,14 +509,22 @@ public class GruvWallpaper {
 
     # ---- lock screen -----------------------------------------------------
     if (Test-Path $wall) {
-        $lockKey = 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\Personalization'
-        try {
-            New-Item -Path $lockKey -Force -ErrorAction Stop | Out-Null
-            New-ItemProperty $lockKey -Name LockScreenImage -Value $wall -PropertyType String -Force -ErrorAction Stop | Out-Null
-            Say "lock screen image set" 'Green'
-        } catch {
-            Say "lock screen needs an admin shell - set it in Settings > Personalization > Lock screen" 'DarkYellow'
-        }
+        # The HKLM policy is ignored on Home; the per-user WinRT call works everywhere without admin.
+        # The projection only exists in Windows PowerShell 5.1, so it always runs there.
+        $lockScript = @'
+Add-Type -AssemblyName System.Runtime.WindowsRuntime
+$null = [Windows.Storage.StorageFile, Windows.Storage, ContentType = WindowsRuntime]
+$null = [Windows.System.UserProfile.LockScreen, Windows.System.UserProfile, ContentType = WindowsRuntime]
+$ext = [System.WindowsRuntimeSystemExtensions].GetMethods()
+$op = ($ext | Where-Object { $_.Name -eq 'AsTask' -and $_.GetParameters().Count -eq 1 -and $_.GetParameters()[0].ParameterType.Name -eq 'IAsyncOperation`1' })[0]
+$act = ($ext | Where-Object { $_.Name -eq 'AsTask' -and $_.GetParameters().Count -eq 1 -and -not $_.IsGenericMethod })[0]
+$file = $op.MakeGenericMethod([Windows.Storage.StorageFile]).Invoke($null, @([Windows.Storage.StorageFile]::GetFileFromPathAsync($env:GG_WALL))).Result
+$act.Invoke($null, @([Windows.System.UserProfile.LockScreen]::SetImageFileAsync($file))).Wait()
+'@
+        $env:GG_WALL = $wall
+        powershell.exe -NoProfile -Command $lockScript
+        if ($LASTEXITCODE -eq 0) { Say "lock screen image set" 'Green' }
+        else { Say "lock screen: could not set image - set it in Settings > Personalization > Lock screen" 'DarkYellow' }
     }
 
     Head 'Restarting Explorer to apply taskbar changes'
