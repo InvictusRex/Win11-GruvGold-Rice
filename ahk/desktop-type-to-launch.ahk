@@ -140,3 +140,10 @@ ToggleLauncher() {
 }
 
 TrayTip "desktop-type-to-launch", "Running. Win opens the launcher; Ctrl+Alt+D toggles.", 0x1
+
+; ---------------------------------------------------------------- btop
+; btop4win only quits on q; Ctrl+C reaches it as a plain key and is ignored.
+; Windows Terminal titles the window "btop4win++" while it runs.
+#HotIf WinActive("btop4win++ ahk_exe WindowsTerminal.exe")
+^c::Send "q"
+#HotIf
