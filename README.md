@@ -5,7 +5,8 @@ taskbar, tiling with gold borders, a keyboard-driven launcher, a desktop clock w
 audio visualiser, and a translucent terminal that greets you with fastfetch.
 
 **Nothing here modifies Windows itself.** No theme-signature patching, no `explorer.exe`
-replacement, no DLL injection, no system files touched. Every component is a userspace
+replacement, no system files touched, and no DLL injection apart from one scoped exception:
+Windhawk, limited to `explorer.exe` (see [Windhawk](#windhawk-explorer-translucency)). Every component is a userspace
 application drawing on top of the normal shell, so `explorer.exe` keeps owning the tray,
 toasts, jump lists and file dialogs. The worst case to undo it is stopping a handful of
 processes, and `uninstall.ps1` restores the settings it changed from a backup taken
@@ -24,6 +25,7 @@ first.
 - [Terminal](#terminal)
 - [Customising](#customising)
 - [Repository layout](#repository-layout)
+- [Windhawk](#windhawk-explorer-translucency)
 - [Known issues and notes](#known-issues-and-notes)
 
 ---
@@ -70,7 +72,8 @@ images to `%LOCALAPPDATA%\GruvGoldRice`. Editing the clone changes nothing until
 | Win+arrow half-screen snapping, Win+D | AutoHotkey v2, called by whkd | `ahk/snap-half.ahk`, `ahk/toggle-desktop.ahk` |
 | Tiling, gold borders, hotkeys | [komorebi](https://github.com/LGUG2Z/komorebi) + whkd, masir for hover-to-focus | `komorebi/` |
 | Terminal | Windows Terminal + a plain PowerShell prompt + [fastfetch](https://github.com/fastfetch-cli/fastfetch) | `terminal/`, `powershell/`, `fastfetch/` |
-| System monitor | [btop4win](https://github.com/aristocratos/btop4win) | `btop/` |
+| System monitor | [btop4win](https://github.com/aristocratos/btop4win), `btop` in PowerShell and Flow | `btop/`, `flow-launcher/plugins/Btop/` |
+| Explorer translucency | [Windhawk](https://windhawk.net) mods, `explorer.exe` only | `windhawk/` |
 
 The top bar holds the clock and network traffic on the left, the active window title in
 the centre, and media, Wi-Fi, Bluetooth, battery, a control centre, the Recycle Bin and a
@@ -147,6 +150,7 @@ anything that failed (usually a declined elevation prompt; re-run in an admin sh
 | `Fastfetch-cli.Fastfetch` | terminal greeting |
 | `LGUG2Z.komorebi`, `LGUG2Z.whkd` | tiling window manager and its hotkey daemon |
 | `LGUG2Z.masir` | focus-follows-mouse for komorebi |
+| `RamenSoftware.Windhawk` | Explorer translucency (mods are installed by hand) |
 | `DEVCOM.JetBrainsMonoNerdFont` | the font (only with `-IncludeFont`, machine-wide, prompts for elevation) |
 
 It changes no settings and writes no configs; that is `apply.ps1`'s job. Open a new
@@ -187,7 +191,8 @@ terminal afterwards so the new commands are on `PATH`.
    PowerShell 5 and 7 profiles, leaving the rest of your profile alone. It deploys the
    fastfetch config and writes this machine's local drives and your chosen name into it.
    Blocks added to the profiles by older versions of the rice are removed.
-9. **btop theme**, in `~\.config\btop\themes` and next to the btop binary.
+9. **btop theme and config**: the theme in `~\.config\btop\themes` and next to the btop binary,
+   and the full `btop.conf` beside the binary (btop rewrites it on exit).
 10. **Rainmeter skins**: the clock and the visualiser.
 11. **AutoHotkey scripts and rice scripts**: the three `.ahk` files, plus `start.ps1` and
     `exam-mode.ps1`, go to `%LOCALAPPDATA%\GruvGoldRice`.
@@ -202,7 +207,8 @@ terminal afterwards so the new commands are on `PATH`.
 - Aero Snap drag-to-edge stays on; Win+arrow belongs to whkd.
 - Taskbar centred, with labels always shown and buttons never combined.
 - Native Win+D is disabled, so it doesn't fight the rice's own Win+D.
-- Lock screen image: needs an elevated shell; otherwise it says how to set it by hand.
+- Lock screen image: set per user through the WinRT `LockScreen` API, so it needs no admin and
+  works on Windows Home. The clock keeps Windows' font.
 - Explorer is restarted so the taskbar changes apply.
 
 ### `scripts/start.ps1` — bring the rice up or down
@@ -246,6 +252,8 @@ global keyboard/mouse hooks (whkd, masir) are what behavioural checks look for.
 - Stops everything the rice runs.
 - Disables autostart by renaming the Startup shortcut, so a reboot mid-exam doesn't bring
   the rice back.
+- Asks Windhawk to exit, which unloads its Explorer mods. Windhawk normally runs elevated, so
+  a non-elevated shell cannot reach it; it is then reported, and you quit it from the tray.
 - Checks that nothing is left running and names anything that is. The Everything
   *service* is ignored: it runs in session 0, draws no window and has no hooks.
 
@@ -291,7 +299,8 @@ once you are sure.
 | Terminal defaults and tab-row theme | patched into Terminal's own `settings.json` |
 | PowerShell prompt and greeting | `~\.config\powershell\gruvgold.ps1`, plus one line in each profile |
 | fastfetch config and logo | `~\.config\fastfetch\` |
-| btop theme | `~\.config\btop\themes\` and next to `btop4win.exe` |
+| btop theme and config | `~\.config\btop\themes\` and next to `btop4win.exe` |
+| btop launcher plugin | `%APPDATA%\FlowLauncher\Plugins\Btop\` |
 | Rainmeter skins | `~\Documents\Rainmeter\Skins\GruvGold\` |
 | AutoHotkey scripts, `start.ps1`, `exam-mode.ps1`, wallpaper, profile picture | `%LOCALAPPDATA%\GruvGoldRice\` |
 | TranslucentTB settings (only if none exist) | TranslucentTB's package `RoamingState` |
@@ -312,6 +321,7 @@ once you are sure.
 | hold `Space`, press `Enter` | opens Windows Terminal in your home folder |
 | `Ctrl + Esc` | the real Start menu |
 | `Ctrl + Alt + D` | suspends / resumes the above |
+| `Ctrl + C` inside btop | quits btop (it only exits on `q` natively) |
 
 Every other `Win + <key>` combination (E, R, L, …) still works as usual.
 
@@ -406,20 +416,45 @@ install.ps1              winget installs
 scripts/                 backup, apply, start, exam-mode (+ disable), uninstall
 theme/                   palette.json, wallpaper.png, profile.png
 ahk/                     Win key / desktop typing / Space+Enter, snapping, Win+D
-btop/                    btop theme
+btop/                    btop theme and config
 fastfetch/               fastfetch config and the dragon logo
-flow-launcher/           theme, Scholar icon, ExamMode plugin
+flow-launcher/           theme, Scholar icon, ExamMode and Btop plugins
 komorebi/                komorebi.json, whkdrc
-powershell/              prompt, input colours, greeting, exam:
+powershell/              prompt, input colours, greeting, exam:, btop alias
 rainmeter/               clock and visualiser skins
 terminal/                Windows Terminal colour scheme fragment
 translucenttb/           seed settings for TranslucentTB
+windhawk/                settings and patches for the Explorer mods
 yasb/                    bar config and styles
 cols.csv                 colour samples behind the palette
 ```
 
 ---
 
+## Windhawk (Explorer translucency)
+
+Windhawk hooks only `explorer.exe`; it patches no system file, so uninstalling it is a full
+revert. Mods can only be installed from its window, so `apply.ps1` does not do it. Once,
+after `install.ps1`:
+
+1. In Windhawk's settings leave "inject into games" and "critical processes" **off** (the
+   defaults) and turn off mod auto-update.
+2. Install **Translucent Windows**. In its Advanced tab set the custom process inclusion list
+   to `explorer.exe` and tick *use only custom lists*; without that it still loads into every
+   process. Apply `windhawk/translucent-windows.patch` in the mod's editor and compile (it
+   swaps the blur for a flat see-through tint, so Explorer matches the 80%-opaque terminal),
+   then enter the values from `windhawk/translucent-windows.json`.
+3. Install **Windows 11 File Explorer Styler**: theme `Translucent Explorer11`, translucent
+   background effect `None`, plus the control styles in `windhawk/file-explorer-styler.json`.
+4. Install **Explorer Font Changer**, apply `windhawk/explorer-font-changer.patch` (adds a
+   *Font size scale* setting), compile, and use `windhawk/explorer-font-changer.json`.
+5. Restart Explorer.
+
+A hook that stops matching after a Windows update simply does not load; nothing breaks. If
+Explorer misbehaves, quit Windhawk from the tray, run `windhawk.exe -safe-mode`, or uninstall
+it from Settings → Apps. Mods that Windhawk compiles are not part of this repository.
+
+---
 ## Known issues and notes
 
 - **Win+D is reimplemented.** On Windows 11 24H2 the native Show Desktop minimises
