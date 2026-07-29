@@ -26,6 +26,8 @@ $startup  = [Environment]::GetFolderPath('Startup')
 $lnk      = Join-Path $startup 'GruvGold - Startup.lnk'
 $disabled = Join-Path $startup 'GruvGold - Startup.lnk.examdisabled'
 
+$windhawk = (Get-Command windhawk.exe -ErrorAction SilentlyContinue).Source, "$env:ProgramFiles\Windhawk\windhawk.exe" | Where-Object { $_ -and (Test-Path $_) } | Select-Object -First 1
+
 function Say($msg, $colour = 'Gray') { Write-Host "  $msg" -ForegroundColor $colour }
 
 # start.ps1 calls `exit`, which would kill this script's own session if invoked
@@ -50,6 +52,7 @@ if ($Off) {
 
     Invoke-Start ''
     Say 'rice restarting now' 'Green'
+    if ($windhawk -and -not (Get-Process windhawk -ErrorAction SilentlyContinue)) { Start-Process $windhawk -ArgumentList '-tray-only'; Say 'Windhawk restarting' 'Green' }
     Write-Host ""
     exit 0
 }
@@ -58,6 +61,12 @@ Write-Host "`nEntering exam mode" -ForegroundColor Yellow
 
 Invoke-Start '-Stop' -Wait
 Say 'rice stopped (komorebi restored your windows cleanly)' 'Green'
+
+# Windhawk injects into explorer.exe; -exit unloads its mods. Proctoring tools flag injection.
+if ($windhawk) {
+    Start-Process $windhawk -ArgumentList '-exit', '-wait' -Wait -ErrorAction SilentlyContinue
+    # Windhawk normally runs elevated, which a non-elevated -exit cannot reach; the check below reports it.
+}
 
 if (Test-Path $lnk) {
     Move-Item $lnk $disabled -Force
@@ -70,7 +79,7 @@ if (Test-Path $lnk) {
 
 Write-Host "`nChecking nothing is still running" -ForegroundColor Yellow
 Start-Sleep -Seconds 2   # some processes (Flow Launcher) take a moment to fully exit
-$watch   = 'yasb', 'komorebi', 'whkd', 'masir', 'Flow.Launcher', 'Rainmeter', 'TranslucentTB', 'AutoHotkey64', 'Everything'
+$watch   = 'yasb', 'komorebi', 'whkd', 'masir', 'Flow.Launcher', 'Rainmeter', 'TranslucentTB', 'AutoHotkey64', 'Everything', 'windhawk'
 # Session 0 is the Everything Windows service, which a non-elevated shell cannot
 # stop; it draws no window and has no hooks, so it is not what a proctor looks for.
 $stillUp = $watch | Where-Object { Get-Process -Name $_ -ErrorAction SilentlyContinue | Where-Object { $_.SessionId -ne 0 } }
