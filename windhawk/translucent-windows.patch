@@ -1,0 +1,14 @@
+diff --git a/translucent-windows.wh.cpp b/translucent-windows.wh.cpp
+index 1d889f7..769a86a 100644
+--- a/translucent-windows.wh.cpp
++++ b/translucent-windows.wh.cpp
+@@ -5164,7 +5164,8 @@ VOID EnableBlurBehind(HWND hWnd)
+         DwmEnableBlurBehindWindow(hWnd, &dwmBlurBehindData);
+         DeleteObject(hRgn);
+ 
+-        accentPolicy.AccentState = ACCENT_STATE_ENABLE_ACRYLICBLURBEHIND;
++        accentPolicy.AccentState = ACCENT_STATE_ENABLE_TRANSPARENTGRADIENT;
++        accentPolicy.AccentFlags = ACCENT_FLAG_ENABLE_GRADIENT_COLOR;
+         accentPolicy.GradientColor = g_settings.AccentBlurBehindClr;
+ 
+         winCompositionAttrib.Attrib = WCA_ACCENT_POLICY;

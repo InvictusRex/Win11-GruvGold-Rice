@@ -178,7 +178,7 @@ Write-Host "`n[5/5] Packages" -ForegroundColor Yellow
 if ($RemovePackages) {
     $ours = @('AmN.yasb','LGUG2Z.komorebi','LGUG2Z.whkd','LGUG2Z.masir','Flow-Launcher.Flow-Launcher',
               'Rainmeter.Rainmeter','CharlesMilette.TranslucentTB','AutoHotkey.AutoHotkey',
-              'JanDeDobbeleer.OhMyPosh','aristocratos.btop4win','voidtools.Everything','Fastfetch-cli.Fastfetch')
+              'JanDeDobbeleer.OhMyPosh','aristocratos.btop4win','voidtools.Everything','Fastfetch-cli.Fastfetch','RamenSoftware.Windhawk')
     # Microsoft.PowerShell is deliberately absent - too generally useful to rip out.
 
     $pre = @()

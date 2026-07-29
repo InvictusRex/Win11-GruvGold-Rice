@@ -1,0 +1,42 @@
+diff --git a/explorer-font-changer.wh.cpp b/explorer-font-changer.wh.cpp
+index ba5df5e..5591164 100644
+--- a/explorer-font-changer.wh.cpp
++++ b/explorer-font-changer.wh.cpp
+@@ -69,6 +69,9 @@ This can be checked by others by going to System Informer, looking for `explorer
+     $name: "Glow: Alpha (0-255)"
+   - intensity: 4
+     $name: "Glow: Intensity (1-..)"
++  - scale: 100
++    $name: "Font size scale (percent)"
++    $description: Scale Explorer's text height, e.g. 120 for 20% bigger.
+   $name: Custom font
+   $description: This font will be used for all font creation in Windows.
+ */
+@@ -90,6 +93,7 @@ namespace util {
+     int s_glow_b = 255;
+     int s_glow_a = 255;
+     int s_glow_intensity = 0;
++    int s_scale = 100;
+ 
+     // Class to declare transparent RAII types.
+     template <class T, auto Fn>
+@@ -205,6 +209,10 @@ namespace util {
+     ) {
+         auto font_name = std::wstring_view(s_font_name.get());
+ 
++        if (s_scale != 100 && font->lfHeight != 0) {
++            font->lfHeight = MulDiv(font->lfHeight, s_scale, 100);
++        }
++
+         // Check font configuration.
+         if (font_name != L"None"sv) {
+             if (font_name.size() <= 31) {
+@@ -258,6 +266,8 @@ namespace util {
+         s_glow_b         = Wh_GetIntSetting(L"font.b");
+         s_glow_a         = Wh_GetIntSetting(L"font.a");
+         s_glow_intensity = Wh_GetIntSetting(L"font.intensity");
++        s_scale          = Wh_GetIntSetting(L"font.scale");
++        if (s_scale <= 0) s_scale = 100;
+     }
+ 
+     bool is_glow_enabled() {

@@ -1,0 +1,18 @@
+{
+  "mod": "translucent-windows",
+  "windhawkProcessInclusionList": ["explorer.exe"],
+  "windhawkProcessExclusionList": [],
+  "settings": {
+    "RenderingMod.ThemeBackground": 1,
+    "RenderingMod.SysColors": 0,
+    "RenderingMod.AccentColorControls": 0,
+    "BackgroundEffects.type": "acrylicblur",
+    "BackgroundEffects.AccentBlurBehind": "99000000",
+    "FlyoutsEffects": 1
+  },
+  "note": "Black tint at alpha 0xCC, about the terminal's opacity 80. Needs translucent-windows.patch (applied in Windhawk's editor and compiled): the stock mod blurs the backdrop, the patch makes it a flat see-through tint like the terminal. In Advanced, set Custom process inclusion list to explorer.exe AND tick "Use only the custom lists" (Include/exclude custom only); otherwise the mod still injects into every process, e.g. Flow Launcher."
+}
+
+
+
+

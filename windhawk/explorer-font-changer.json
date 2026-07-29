@@ -1,0 +1,13 @@
+{
+  "mod": "explorer-font-changer",
+  "windhawkProcessInclusionList": [],
+  "settings": {
+    "font.name": "JetBrainsMono NF",
+    "font.glow": 0,
+    "font.scale": 110
+  },
+  "note": "Mod's own include is explorer.exe. Changes GDI fonts in Explorer, matching the terminal and YASB font."
+}
+
+
+

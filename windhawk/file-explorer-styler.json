@@ -1,0 +1,14 @@
+{
+  "mod": "windows-11-file-explorer-styler",
+  "windhawkProcessInclusionList": [],
+  "settings": {
+    "theme": "Translucent Explorer11",
+    "backgroundTranslucentEffect": "none",
+    "controlStyles": [{"target": "Grid#DetailsViewControlRootGrid", "styles": ["Background=#99000000"]}, {"target": "Grid#HomeViewRootGrid", "styles": ["Background=#99000000"]}, {"target": "Microsoft.UI.Xaml.Controls.Grid#GalleryRootGrid", "styles": ["Background=#99000000"]}, {"target": "StackPanel#DetailsViewThumbnail > Grid", "styles": ["Background=#99000000"]}, {"target": "FileExplorerExtensions.AddressBarControl > Grid#PART_LayoutRoot > Grid#NormalModeGrid", "styles": ["Background=#26000000"]}, {"target": "Windows.UI.Xaml.Controls.Grid#RootCommandSearchGrid > Windows.UI.Xaml.Controls.Border#BorderElement", "styles": ["Background=#26000000"]}, {"target": "Grid#TabContainerGrid", "styles": ["Background=Transparent"]}, {"target": "Microsoft.UI.Xaml.Controls.Grid#PART_LayoutRoot", "styles": ["Background=Transparent"]}]
+  },
+  "note": "The mod's own include is explorer.exe. Needed for the WinUI parts of the new Explorer; Translucent Windows alone does not tint those."
+}
+
+
+
+

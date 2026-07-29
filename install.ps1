@@ -30,6 +30,7 @@ $packages = [ordered]@{
     'LGUG2Z.komorebi'               = 'komorebi tiling WM'
     'LGUG2Z.whkd'                   = 'whkd hotkey daemon'
     'LGUG2Z.masir'                  = 'masir (focus-follows-mouse for komorebi)'
+    'RamenSoftware.Windhawk'        = 'Windhawk (Explorer translucency)'
 }
 
 if ($IncludeFont) {
