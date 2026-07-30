@@ -211,6 +211,10 @@ if (-not $SkipConfigs) {
             $webSearchPlugin = $fs.PluginSettings.Plugins.PSObject.Properties.Value |
                 Where-Object { $_.Name -eq 'Web Searches' }
             if ($webSearchPlugin) { $webSearchPlugin.ActionKeywords = $keepKeywords }
+            # Plugin Indicator also answers typed text (home/github/btop shortcuts) -
+            # that needs it enabled and global. "?" still lists every keyword.
+            $indicator = $fs.PluginSettings.Plugins.PSObject.Properties.Value | Where-Object { $_.Name -eq 'Plugin Indicator' }
+            if ($indicator) { $indicator.Disabled = $false; $indicator.ActionKeywords = @('?', '*') }
             # AutoUpdates is already off; AutoUpdatePlugins would silently redownload
             # built-in plugins (including our hand-patched PluginIndicator) and undo
             # the local rebuild - off, and only ever updated by hand.
@@ -240,6 +244,38 @@ if (-not $SkipConfigs) {
                 } else { Say "btop4win not found - skipped the btop launcher entry" 'DarkYellow' }
             } else { Say "no Python found - skipped the exam: launcher shortcut" 'DarkYellow' }
             $fs | ConvertTo-Json -Depth 32 | Set-Content $flowMainSettings -Encoding utf8
+
+            # Empty-query home list (patched Plugin Indicator, source in
+            # flow-launcher/plugin-indicator-patch): fixed order, own icons,
+            # plus the home/github/linkedin links. KeywordIcons gives the "?" list
+            # the custom icons for the colon keywords.
+            $piDir = "$env:APPDATA\FlowLauncher\Settings\Plugins\Flow.Launcher.Plugin.PluginIndicator"
+            $piIcons = Join-Path $piDir 'Icons'
+            New-Item -ItemType Directory -Path $piIcons -Force | Out-Null
+            Copy-Item (Join-Path $cfg 'flow-launcher\icons\home\*') $piIcons -Force
+            $ic = { param($n) Join-Path $piIcons "$n.png" }
+            $entry = { param($t, $sub, $icon, $kw, $url) [ordered]@{ Title = $t; SubTitle = $sub; Icon = (& $ic $icon); Keyword = $kw; Url = $url; Command = ''; Args = '' } }
+            $homeEntries = @(
+                (& $entry '>' 'Run a shell command' 'shell' '>' ''),
+                (& $entry 'doc:' 'Search file contents' 'doc' 'doc:' ''),
+                (& $entry 'game:' 'Launch a game' 'game' 'game:' ''),
+                (& $entry 'home' 'home.rupa.dev' 'glance' '' 'https://home.rupa.dev/'),
+                (& $entry 'github' 'github.com/InvictusRex' 'github' '' 'https://github.com/InvictusRex'),
+                (& $entry 'linkedin' 'linkedin.com/in/rupankar-majumdar' 'linkedin' '' 'https://www.linkedin.com/in/rupankar-majumdar/'),
+                (& $entry 'exam:' 'Stop the rice for a proctored test' 'exam' 'exam:' ''),
+                (& $entry 'gmail:' 'Search Gmail' 'gmail' 'gmail:' ''),
+                (& $entry 'youtube:' 'Search YouTube' 'youtube' 'youtube:' ''),
+                (& $entry 'translate:' 'Google Translate' 'translate' 'translate:' ''),
+                (& $entry 'maps:' 'Google Maps' 'maps' 'maps:' ''),
+                (& $entry 'sc:' 'Google Scholar' 'sc' 'sc:' ''),
+                (& $entry 'btop' 'System monitor' 'btop' 'btop' '')
+            )
+            # btop runs straight away (same launch as the Btop plugin) instead of filling the query.
+            if ($btopBin) { $homeEntries[-1].Command = 'wt.exe'; $homeEntries[-1].Args = "-w new `"$btopBin`"" }
+            $kwIcons = [ordered]@{}
+            foreach ($k in 'sc', 'gmail', 'maps', 'translate', 'youtube') { $kwIcons["${k}:"] = & $ic $k }
+            [ordered]@{ KeywordIcons = $kwIcons; HomeEntries = $homeEntries } | ConvertTo-Json -Depth 5 | Set-Content (Join-Path $piDir 'Settings.json') -Encoding utf8
+            Say "set launcher home entries (order + icons)" 'Green'
 
             $ws = Get-Content $webSearchSettings -Raw | ConvertFrom-Json
             # Keywords end in a colon (re-runs: sources may already carry it).
