@@ -179,10 +179,17 @@ terminal afterwards so the new commands are on `PATH`.
 4. **Everything backend**: switches Flow's file search and path search to Everything.
    Content search stays on the Windows index.
 5. **Flow plugin cleanup**:
-   - Web searches are trimmed to Google (the fallback), Scholar (`sc`, with its own
-     icon), Maps, Translate, Gmail and YouTube.
+   - Web searches are trimmed to Google (the fallback), Scholar (`sc:`, with its own
+     icon), Maps (`maps:`), Translate (`translate:`), Gmail (`gmail:`) and YouTube
+     (`youtube:`). Keywords end in a colon.
+   - The launcher's empty-query list is fixed to `>`, `doc:`, `game:`, `home`, `github`,
+     `linkedin`, `exam:`, `gmail:`, `youtube:`, `translate:`, `maps:`, `sc:`, `btop`, in
+     that order, with their own icons. Picking a keyword fills the query box;
+     `home`, `github` and `linkedin` open the links and `btop` opens btop. Typing
+     `home`, `github` or `btop` finds the same shortcut. This needs the patched Plugin
+     Indicator, built from `flow-launcher/plugin-indicator-patch/`.
    - Browser Bookmarks is disabled, and plugin auto-updates are turned off.
-   - If Python 3 is found, it installs the ExamMode plugin (`exam: on` / `exam: off`).
+   - If Python 3 is found, it installs the ExamMode plugin (`exam:` then `on`).
 6. **Stop auto-updates**: turns off Rainmeter's update check and PowerShell 7's "new
    version available" notice.
 7. **Windows Terminal**: adds the GruvGold colour scheme as a fragment, then patches
@@ -257,8 +264,9 @@ global keyboard/mouse hooks (whkd, masir) are what behavioural checks look for.
 - Checks that nothing is left running and names anything that is. The Everything
   *service* is ignored: it runs in session 0, draws no window and has no hooks.
 
-The same thing is available from anywhere as `exam: on` / `exam: off`, both in
-PowerShell and in Flow Launcher. `disable.ps1` is an identical copy under a more general
+The same thing is available from anywhere as `exam: on` / `exam: off` in PowerShell;
+Flow Launcher only offers `exam:` then `on`, since it cannot be reached once the rice
+is stopped. `disable.ps1` is an identical copy under a more general
 name.
 
 ### `scripts/uninstall.ps1` — full reversal
@@ -295,6 +303,7 @@ once you are sure.
 | komorebi `applications.json` (downloaded) | `~\.config\komorebi\` |
 | Flow Launcher theme | `%APPDATA%\FlowLauncher\Themes\GruvGold.xaml` |
 | Flow ExamMode plugin | `%APPDATA%\FlowLauncher\Plugins\ExamMode\` |
+| Flow home list and icons | `%APPDATA%\FlowLauncher\Settings\Plugins\Flow.Launcher.Plugin.PluginIndicator\` |
 | Terminal colour scheme | `%LOCALAPPDATA%\Microsoft\Windows Terminal\Fragments\GruvGold\` |
 | Terminal defaults and tab-row theme | patched into Terminal's own `settings.json` |
 | PowerShell prompt and greeting | `~\.config\powershell\gruvgold.ps1`, plus one line in each profile |
@@ -418,7 +427,7 @@ theme/                   palette.json, wallpaper.png, profile.png
 ahk/                     Win key / desktop typing / Space+Enter, snapping, Win+D
 btop/                    btop theme and config
 fastfetch/               fastfetch config and the dragon logo
-flow-launcher/           theme, Scholar icon, ExamMode and Btop plugins
+flow-launcher/           theme, icons, ExamMode and Btop plugins, Plugin Indicator patch
 komorebi/                komorebi.json, whkdrc
 powershell/              prompt, input colours, greeting, exam:, btop alias
 rainmeter/               clock and visualiser skins
