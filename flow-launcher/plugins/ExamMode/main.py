@@ -33,12 +33,12 @@ def query(search):
 
 
 def run(key):
-    # Exam mode kills Flow Launcher, which is this process's parent - start it
-    # fully detached so it survives.
-    DETACHED_PROCESS, NEW_GROUP, NO_WINDOW = 0x8, 0x200, 0x08000000
+    # Exam mode kills Flow Launcher, which is this process's parent - own process
+    # group so it survives. Not DETACHED_PROCESS: powershell.exe never runs under it.
+    NEW_GROUP, NO_WINDOW = 0x200, 0x08000000
     subprocess.Popen(
         ["powershell.exe", "-NoProfile", "-ExecutionPolicy", "Bypass", "-File", SCRIPT, *OPTIONS[key][2]],
-        creationflags=DETACHED_PROCESS | NEW_GROUP | NO_WINDOW,
+        creationflags=NEW_GROUP | NO_WINDOW,
         stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
         close_fds=True,
     )
