@@ -195,7 +195,7 @@ if (-not $SkipConfigs) {
         try {
             # Web Searches - keep only Google (the "*" fallback), Scholar, Maps,
             # Translate, Gmail and YouTube; drop the rest of the default list.
-            $keepKeywords = @('*', 'sc', 'maps', 'translate', 'gmail', 'youtube')
+            $keepKeywords = @('*', 'sc:', 'maps:', 'translate:', 'gmail:', 'youtube:')
 
             # Browser Bookmarks (the "b" keyword) - not wanted. Also mirror the
             # trimmed Web Searches keyword list into the main Settings.json: the
@@ -228,7 +228,7 @@ if (-not $SkipConfigs) {
                 New-Item -ItemType Directory -Path $examDir -Force | Out-Null
                 Copy-Item (Join-Path $cfg 'flow-launcher\plugins\ExamMode\*') $examDir -Force
                 "$live\scripts\exam-mode.ps1" | Set-Content (Join-Path $examDir 'examscript.txt') -Encoding utf8 -NoNewline
-                Say "installed exam: on/off launcher shortcut" 'Green'
+                Say "installed exam: launcher shortcut" 'Green'
                 # "btop" launcher entry (flow-launcher/plugins/Btop): opens btop4win in a new terminal.
                 $btopDir = "$env:APPDATA\FlowLauncher\Plugins\Btop"
                 $btopBin = (Get-Command btop4win -ErrorAction SilentlyContinue | Select-Object -First 1).Source
@@ -242,12 +242,14 @@ if (-not $SkipConfigs) {
             $fs | ConvertTo-Json -Depth 32 | Set-Content $flowMainSettings -Encoding utf8
 
             $ws = Get-Content $webSearchSettings -Raw | ConvertFrom-Json
+            # Keywords end in a colon (re-runs: sources may already carry it).
+            foreach ($src in $ws.SearchSources) { if ($src.ActionKeyword -notin '*', '' -and -not $src.ActionKeyword.EndsWith(':')) { $src.ActionKeyword += ':' } }
             $ws.SearchSources = @($ws.SearchSources | Where-Object { $keepKeywords -contains $_.ActionKeyword })
 
             # Google Scholar shares the plain Google icon by default - give it its own.
             $customIconsDir = "$env:APPDATA\FlowLauncher\Settings\Plugins\Flow.Launcher.Plugin.WebSearch\CustomIcons"
             Deploy (Join-Path $cfg 'flow-launcher\icons\google_scholar.png') (Join-Path $customIconsDir 'google_scholar.png')
-            $scholar = $ws.SearchSources | Where-Object { $_.ActionKeyword -eq 'sc' }
+            $scholar = $ws.SearchSources | Where-Object { $_.ActionKeyword -eq 'sc:' }
             if ($scholar) {
                 $scholar.Icon = 'google_scholar.png'
                 $scholar.CustomIcon = $true
