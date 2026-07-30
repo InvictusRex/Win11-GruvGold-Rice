@@ -7,7 +7,7 @@ namespace Flow.Launcher.Plugin.PluginIndicator
         // Action keyword -> absolute path of an icon file. When present and the
         // file exists, the "?" keyword-indicator list shows this icon for that
         // keyword instead of the owning plugin's single default icon. Not part
-        // of upstream Flow Launcher - a local patch (see Windows Rice repo).
+        // of upstream Flow Launcher - a local patch (see scripts/apply.ps1).
         public Dictionary<string, string> KeywordIcons { get; set; } = new();
 
         // Fixed, ordered contents of the empty-query home page (local patch).
