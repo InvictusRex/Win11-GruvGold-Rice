@@ -2,7 +2,7 @@
   "ID": "41229EE3C264471D97459571F95C18FC",
   "ActionKeyword": "exam:",
   "Name": "Exam Mode",
-  "Description": "Stop the rice for a proctored test (exam: on) or bring it back (exam: off)",
+  "Description": "Stop the rice for a proctored test (exam: on)",
   "Author": "local",
   "Version": "1.0.0",
   "Language": "python",

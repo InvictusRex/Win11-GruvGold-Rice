@@ -12,7 +12,6 @@ with open(os.path.join(HERE, "examscript.txt"), encoding="utf-8-sig") as f:
 
 OPTIONS = {
     "on": ("Exam mode: ON", "Stop yasb, komorebi, whkd, masir, AutoHotkey, Rainmeter, Everything, Flow Launcher; disable autostart", []),
-    "off": ("Exam mode: OFF", "Restore autostart and bring the rice back", ["-Off"]),
 }
 
 
