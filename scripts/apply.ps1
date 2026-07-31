@@ -177,11 +177,38 @@ if (-not $SkipConfigs) {
             $flowExe = Get-Item "$env:LOCALAPPDATA\FlowLauncher\Flow.Launcher.exe" -ErrorAction SilentlyContinue
             if ($flowExe) { Start-Process $flowExe.FullName }
         }
-        # NOT doing per-folder exclusion (e.g. D:\config) here: Everything.ini's
-        # exclude_folders does not reliably apply to NTFS-indexed volumes - voidtools'
-        # own docs call this "in development", and it was confirmed flaky against this
-        # NTFS-indexed D:\ (worked once, then a forced -reindex un-excluded it again).
-        # The NTFS tab only supports excluding a whole volume, not a subfolder.
+        # Keep AppData, every dot-folder/dot-file in the profile (.cache, .claude.json,
+        # ...) and D:\config out of the index. Everything.ini escapes backslashes as
+        # \\ (see ntfs_volume_guids), so a path written with single backslashes is read
+        # with them dropped - an earlier "D:\config" exclusion became "D:config" and
+        # never matched, which is what made exclusions look unreliable on NTFS volumes.
+        # Everything rewrites the ini when it exits, so close it before editing.
+        $everythingIni = "$env:APPDATA\Everything\Everything.ini"
+        if (Test-Path $everythingIni) {
+            # Only this session's instance holds the ini; the session-0 service stays up.
+            $mySession = (Get-Process -Id $PID).SessionId
+            $mine = @(Get-Process Everything -ErrorAction SilentlyContinue | Where-Object { $_.SessionId -eq $mySession })
+            if ($mine) { & $everythingExe -exit; $mine | Wait-Process -Timeout 20 -ErrorAction SilentlyContinue }
+
+            $esc = { param($s) $s.Replace('\', '\\') }
+            $excludeFolders = ((Join-Path $env:USERPROFILE 'AppData'), (Join-Path $env:USERPROFILE '.*'), 'D:\config' |
+                ForEach-Object { '"' + (& $esc $_) + '"' }) -join ','
+            # Patterns match names, so a same-named file elsewhere is hidden too.
+            $excludeFiles = (Get-ChildItem -LiteralPath $env:USERPROFILE -Force -File -Filter '.*' | ForEach-Object Name) -join ';'
+
+            $old = [IO.File]::ReadAllLines($everythingIni)
+            $lines = [System.Collections.Generic.List[string]]$old
+            foreach ($kv in @{ exclude_list_enabled = '1'; exclude_folders = $excludeFolders; exclude_files = $excludeFiles }.GetEnumerator()) {
+                $i = $lines.FindIndex({ param($l) $l.StartsWith("$($kv.Key)=") })
+                if ($i -ge 0) { $lines[$i] = "$($kv.Key)=$($kv.Value)" } else { $lines.Add("$($kv.Key)=$($kv.Value)") }
+            }
+            $changed = (@($old) -join "`n") -ne ($lines -join "`n")
+            [IO.File]::WriteAllLines($everythingIni, $lines, (New-Object System.Text.UTF8Encoding $false))
+
+            # NTFS volumes keep the old entries in the database until it is rebuilt.
+            if ($mine) { Start-Process $everythingExe -ArgumentList $(if ($changed) { '-startup', '-reindex' } else { '-startup' }) }
+            Say "Everything now excludes AppData, dot-folders/dotfiles in the profile and D:\config" 'Green'
+        } else { Say "Everything.ini not found yet - run Everything once, then re-run apply.ps1" 'DarkYellow' }
     }
 
     Head '[5/11] Flow Launcher plugin cleanup'
