@@ -545,6 +545,24 @@ public class GruvWallpaper {
     $hot = (Get-ItemProperty $adv -Name DisabledHotkeys -ErrorAction SilentlyContinue).DisabledHotkeys
     if ($hot -notmatch "D") { New-ItemProperty $adv -Name DisabledHotkeys -Value "$hot`D" -PropertyType String -Force | Out-Null }
 
+    # Touchpad three-finger swipe down = custom shortcut Win+D, so the gesture goes
+    # through whkd -> toggle-desktop.ahk. Its built-in "Show desktop" calls Explorer
+    # directly, skips that script, and minimises YASB. 0xFFFF = custom; KeyParams is
+    # (VK 'D' 0x44 << 16) | Win 0x4. Values as the Settings UI writes them; the other
+    # three directions are the stock ones it writes alongside.
+    $ptp = 'HKCU:\Software\Microsoft\Windows\CurrentVersion\PrecisionTouchPad'
+    foreach ($kv in @{
+        ThreeFingerSlideEnabled  = 0xFFFF
+        ThreeFingerDown          = 0xFFFF
+        ThreeFingerDownKeyParams = 0x440004
+        ThreeFingerUp            = 2
+        ThreeFingerLeft          = 1
+        ThreeFingerRight         = 1
+    }.GetEnumerator()) {
+        New-ItemProperty $ptp -Name $kv.Key -Value $kv.Value -PropertyType DWord -Force | Out-Null
+    }
+    Say "touchpad: three-finger swipe down -> Win+D (toggle-desktop.ahk)" 'Green'
+
     # ---- lock screen -----------------------------------------------------
     if (Test-Path $wall) {
         # The HKLM policy is ignored on Home; the per-user WinRT call works everywhere without admin.

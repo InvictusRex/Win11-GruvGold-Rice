@@ -24,6 +24,10 @@ DetectHiddenWindows True   ; see first-press loop; also needed to restore cloake
 ; bar/widgets because they are excluded by process name, so there is nothing for
 ; the bug to hide.
 ;
+; The touchpad's three-finger swipe down is mapped to Win+D (custom shortcut, set by
+; apply.ps1) so it takes this path too - its built-in "Show desktop" calls Explorer
+; directly and would minimise the bar.
+;
 ; State (the hwnds we minimised) is kept in a temp file so it survives between
 ; the one-shot invocations whkd makes per keypress.
 

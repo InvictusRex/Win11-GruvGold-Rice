@@ -25,7 +25,8 @@ win + down                  : & "$Env:LOCALAPPDATA\Programs\AutoHotkey\v2\AutoHo
 
 # Windows 11 24H2 minimises the YASB bar along with everything else on native
 # Win+D and does not reliably bring it back (upstream, see toggle-desktop.ahk).
-# Reimplemented here instead, same trick as the snap keys above.
+# Reimplemented here instead, same trick as the snap keys above. The touchpad's
+# three-finger swipe down is set to a Win+D custom shortcut (apply.ps1), so it lands here too.
 win + d                     : & "$Env:LOCALAPPDATA\Programs\AutoHotkey\v2\AutoHotkey64.exe" "$Env:LOCALAPPDATA\GruvGoldRice\toggle-desktop.ahk"
 
 win + shift + left          : komorebic move left
