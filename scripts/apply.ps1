@@ -214,6 +214,7 @@ if (-not $SkipConfigs) {
     Head '[5/11] Flow Launcher plugin cleanup'
     $flowMainSettings = "$env:APPDATA\FlowLauncher\Settings\Settings.json"
     $webSearchSettings = "$env:APPDATA\FlowLauncher\Settings\Plugins\Flow.Launcher.Plugin.WebSearch\Settings.json"
+    $programSettings = "$env:APPDATA\FlowLauncher\Settings\Plugins\Flow.Launcher.Plugin.Program\Settings.json"
     if (-not (Test-Path $flowMainSettings) -or -not (Test-Path $webSearchSettings)) {
         Say "Flow Launcher plugin settings not created yet - run Flow Launcher once, then re-run apply.ps1" 'DarkYellow'
     } else {
@@ -320,6 +321,15 @@ if (-not $SkipConfigs) {
 
             $ws | ConvertTo-Json -Depth 32 | Set-Content $webSearchSettings -Encoding utf8
             Say "disabled Browser Bookmarks; Web Searches trimmed to sc/maps/translate/gmail/youtube (+ Google default)" 'Green'
+
+            # The Program plugin lists Notepad/Paint twice: once as the UWP app and
+            # once as the packaged exe under WindowsApps. This merges them.
+            if (Test-Path $programSettings) {
+                $ps = Get-Content $programSettings -Raw | ConvertFrom-Json
+                $ps | Add-Member HideDuplicatedWindowsApp $true -Force
+                $ps | ConvertTo-Json -Depth 32 | Set-Content $programSettings -Encoding utf8
+                Say "Program plugin: duplicate Windows apps hidden (one Notepad, one Paint)" 'Green'
+            } else { Say "Program plugin settings not found - run Flow Launcher once, then re-run apply.ps1" 'DarkYellow' }
         } catch {
             Say "could not patch plugin settings: $($_.Exception.Message)" 'DarkYellow'
         }
