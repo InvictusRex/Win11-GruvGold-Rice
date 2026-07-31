@@ -105,6 +105,8 @@ widgets:
       max_length: 40
       max_length_ellipsis: "…"
       monitor_exclusive: false
+      ignore_window:
+        classes: ["RainmeterMeterWindow"]   # skin windows grab focus at load; their title is the .ini path
       class_name: "context-island"
       callbacks:
         on_left: "toggle_label"
