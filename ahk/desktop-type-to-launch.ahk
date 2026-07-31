@@ -32,7 +32,9 @@ DesktopFocused(*) {
         cls := WinGetClass(hwnd)
         ; Progman owns the desktop normally; WorkerW takes over when a wallpaper
         ; slideshow or web content is active. Both mean "the desktop is focused".
-        return (cls = "Progman" || cls = "WorkerW")
+        ; Closing Flow Launcher hands focus to a Rainmeter skin window (they sit
+        ; on the desktop), so that counts as the desktop too.
+        return (cls = "Progman" || cls = "WorkerW" || cls = "RainmeterMeterWindow")
     } catch {
         return true                  ; nothing we can identify - treat as desktop
     }
