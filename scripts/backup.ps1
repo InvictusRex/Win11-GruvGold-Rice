@@ -71,6 +71,7 @@ $keys = @(
     'HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced'
     'HKCU\Software\Microsoft\Windows\CurrentVersion\Themes\Personalize'
     'HKCU\Software\Microsoft\Windows\DWM'
+    'HKCU\Software\WinSTEP2000'
     'HKCU\Control Panel\Desktop'
     'HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Accent'
 )
@@ -132,7 +133,7 @@ $state = [ordered]@{
     systemUsesLightTheme = $pers.SystemUsesLightTheme
     colorPrevalence      = $dwm.ColorPrevalence    # accent on title bars
     accentColor          = $dwm.AccentColor
-    runningProcesses     = @(Get-Process | Where-Object { $_.Name -match 'yasb|komorebi|whkd|Flow|Rainmeter|Translucent|AutoHotkey' } | Select-Object -ExpandProperty Name -Unique)
+    runningProcesses     = @(Get-Process | Where-Object { $_.Name -match 'yasb|komorebi|whkd|Flow|Rainmeter|Nexus|AutoHotkey' } | Select-Object -ExpandProperty Name -Unique)
 }
 $state | ConvertTo-Json -Depth 4 | Set-Content (Join-Path $dest 'state.json') -Encoding utf8
 $state.GetEnumerator() | ForEach-Object { Say ("{0,-22} {1}" -f $_.Key, $_.Value) }
@@ -140,7 +141,7 @@ $state.GetEnumerator() | ForEach-Object { Say ("{0,-22} {1}" -f $_.Key, $_.Value
 # Record which of our packages were ALREADY installed, so uninstall.ps1 never
 # removes something the user had before the rice.
 $ours = @('AmN.yasb','LGUG2Z.komorebi','LGUG2Z.whkd','LGUG2Z.masir','Flow-Launcher.Flow-Launcher',
-          'Rainmeter.Rainmeter','CharlesMilette.TranslucentTB','AutoHotkey.AutoHotkey',
+          'Rainmeter.Rainmeter','WinStep.Nexus','AutoHotkey.AutoHotkey',
           'JanDeDobbeleer.OhMyPosh','Microsoft.PowerShell','aristocratos.btop4win',
           'voidtools.Everything','Fastfetch-cli.Fastfetch')
 $installed = @()

@@ -52,7 +52,7 @@ if (Get-Command komorebic -ErrorAction SilentlyContinue) {
     Say 'komorebic stop --whkd' 'Green'
 }
 
-foreach ($p in 'yasb', 'komorebi', 'whkd', 'masir', 'Flow.Launcher', 'Rainmeter', 'TranslucentTB', 'AutoHotkey64', 'AutoHotkey', 'Everything') {
+foreach ($p in 'yasb', 'komorebi', 'whkd', 'masir', 'Flow.Launcher', 'Rainmeter', 'Nexus', 'AutoHotkey64', 'AutoHotkey', 'Everything') {
     $proc = Get-Process -Name $p -ErrorAction SilentlyContinue
     if ($proc) { $proc | Stop-Process -Force -ErrorAction SilentlyContinue; Say "stopped $p" 'Green' }
 }
@@ -61,12 +61,12 @@ foreach ($p in 'yasb', 'komorebi', 'whkd', 'masir', 'Flow.Launcher', 'Rainmeter'
 Write-Host "`n[2/5] Removing autostart entries" -ForegroundColor Yellow
 $startup = [Environment]::GetFolderPath('Startup')
 foreach ($lnk in Get-ChildItem $startup -Filter '*.lnk' -ErrorAction SilentlyContinue) {
-    if ($lnk.BaseName -match 'yasb|komorebi|GruvGold|desktop-type|Flow Launcher|Rainmeter|TranslucentTB') {
+    if ($lnk.BaseName -match 'yasb|komorebi|GruvGold|desktop-type|Flow Launcher|Rainmeter|Nexus') {
         Remove-Item $lnk.FullName -Force
         Say "removed $($lnk.Name)" 'Green'
     }
 }
-foreach ($name in 'yasb', 'komorebi', 'GruvGoldRice') {
+foreach ($name in 'yasb', 'komorebi', 'GruvGoldRice', 'Nexus') {
     $run = 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Run'
     if (Get-ItemProperty $run -Name $name -ErrorAction SilentlyContinue) {
         Remove-ItemProperty $run -Name $name -Force
@@ -177,7 +177,7 @@ public class Wallpaper {
 Write-Host "`n[5/5] Packages" -ForegroundColor Yellow
 if ($RemovePackages) {
     $ours = @('AmN.yasb','LGUG2Z.komorebi','LGUG2Z.whkd','LGUG2Z.masir','Flow-Launcher.Flow-Launcher',
-              'Rainmeter.Rainmeter','CharlesMilette.TranslucentTB','AutoHotkey.AutoHotkey',
+              'Rainmeter.Rainmeter','WinStep.Nexus','AutoHotkey.AutoHotkey',
               'JanDeDobbeleer.OhMyPosh','aristocratos.btop4win','voidtools.Everything','Fastfetch-cli.Fastfetch','RamenSoftware.Windhawk')
     # Microsoft.PowerShell is deliberately absent - too generally useful to rip out.
 
@@ -194,6 +194,7 @@ if ($RemovePackages) {
     }
 } else {
     Say 'left installed (pass -RemovePackages to uninstall them)' 'DarkGray'
+    Say 'Windhawk keeps running its Taskbar Styler: the taskbar stays reduced to the tray pill until you disable that mod in Windhawk.' 'DarkYellow'
 }
 
 # ---------------------------------------------------------------- finish

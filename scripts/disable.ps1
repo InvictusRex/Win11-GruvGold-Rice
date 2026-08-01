@@ -70,7 +70,7 @@ if (Test-Path $lnk) {
 
 Write-Host "`nChecking nothing is still running" -ForegroundColor Yellow
 Start-Sleep -Seconds 2   # some processes (Flow Launcher) take a moment to fully exit
-$watch   = 'yasb', 'komorebi', 'whkd', 'masir', 'Flow.Launcher', 'Rainmeter', 'TranslucentTB', 'AutoHotkey64', 'Everything'
+$watch   = 'yasb', 'komorebi', 'whkd', 'masir', 'Flow.Launcher', 'Rainmeter', 'Nexus', 'AutoHotkey64', 'Everything'
 # Session 0 is the Everything Windows service, which a non-elevated shell cannot
 # stop; it draws no window and has no hooks, so it is not what a proctor looks for.
 $stillUp = $watch | Where-Object { Get-Process -Name $_ -ErrorAction SilentlyContinue | Where-Object { $_.SessionId -ne 0 } }
