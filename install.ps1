@@ -20,7 +20,7 @@ $ErrorActionPreference = 'Continue'
 $packages = [ordered]@{
     'Microsoft.PowerShell'          = 'PowerShell 7'
     'AmN.yasb'                      = 'YASB status bar'
-    'CharlesMilette.TranslucentTB'  = 'TranslucentTB'
+    'WinStep.Nexus'                 = 'Nexus dock (bottom apps dock)'
     'Flow-Launcher.Flow-Launcher'   = 'Flow Launcher'
     'voidtools.Everything'          = 'Everything (file index for Flow)'
     'AutoHotkey.AutoHotkey'         = 'AutoHotkey v2'
@@ -30,7 +30,7 @@ $packages = [ordered]@{
     'LGUG2Z.komorebi'               = 'komorebi tiling WM'
     'LGUG2Z.whkd'                   = 'whkd hotkey daemon'
     'LGUG2Z.masir'                  = 'masir (focus-follows-mouse for komorebi)'
-    'RamenSoftware.Windhawk'        = 'Windhawk (Explorer translucency)'
+    'RamenSoftware.Windhawk'        = 'Windhawk (Explorer translucency, lock-screen clock font)'
 }
 
 if ($IncludeFont) {
@@ -46,7 +46,8 @@ $installed = 0; $skipped = 0; $failed = @()
 foreach ($id in $packages.Keys) {
     $label = '{0,-34}' -f $packages[$id]
 
-    $check = winget list --id $id --exact --accept-source-agreements 2>&1 | Out-String
+    # --source winget: a failing msstore source otherwise aborts with "multiple sources" errors.
+    $check = winget list --id $id --exact --source winget --accept-source-agreements 2>&1 | Out-String
     if ($check -notmatch 'No installed package') {
         Write-Host "  $label already present" -ForegroundColor DarkGray
         $skipped++
@@ -54,11 +55,11 @@ foreach ($id in $packages.Keys) {
     }
 
     Write-Host "  $label installing..." -ForegroundColor Yellow -NoNewline
-    $log = winget install --id $id --exact --silent `
+    $log = winget install --id $id --exact --source winget --silent `
                           --accept-package-agreements --accept-source-agreements `
                           --disable-interactivity 2>&1 | Out-String
 
-    $verify = winget list --id $id --exact --accept-source-agreements 2>&1 | Out-String
+    $verify = winget list --id $id --exact --source winget --accept-source-agreements 2>&1 | Out-String
     if ($verify -notmatch 'No installed package') {
         Write-Host "`r  $label installed        " -ForegroundColor Green
         $installed++
