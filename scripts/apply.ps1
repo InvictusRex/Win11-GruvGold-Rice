@@ -69,12 +69,26 @@ if (-not $SkipConfigs) {
     $yaml = (Get-Content $yasbCfg -Raw -Encoding UTF8) -replace '(?m)^(\s*profile_image_path:)[^\r\n]*', ('$1 "' + ($live -replace '\\', '/') + '/theme/profile.png"')
     [IO.File]::WriteAllText($yasbCfg, $yaml, (New-Object System.Text.UTF8Encoding $false))
 
-    # Without a settings.json TranslucentTB treats every launch as a first run and
-    # pops its welcome dialog at boot. Only seed it - never overwrite the user's own.
-    $ttbSettings = "$env:LOCALAPPDATA\Packages\28017CharlesMilette.TranslucentTB_v826wp6bftszj\RoamingState\settings.json"
-    if (-not (Test-Path $ttbSettings)) {
-        New-Item -ItemType Directory -Path (Split-Path $ttbSettings) -Force | Out-Null
-        Copy-Item (Join-Path $cfg 'translucenttb\settings.json') $ttbSettings
+    Head '[1b/11] Nexus dock (bottom apps dock)'
+    $nexusExe = "${env:ProgramFiles(x86)}\Winstep\Nexus.exe"
+    if (Test-Path $nexusExe) {
+        # Nexus only creates its registry settings on first run.
+        if (-not (Test-Path 'HKCU:\Software\WinSTEP2000\NeXuS\Docks')) {
+            Start-Process $nexusExe
+            for ($i = 0; $i -lt 20 -and -not (Test-Path 'HKCU:\Software\WinSTEP2000\NeXuS\Docks'); $i++) { Start-Sleep 1 }
+        }
+        # Always Windows PowerShell 5.1: the script's icon helper does not compile under pwsh 7.
+        powershell.exe -NoProfile -ExecutionPolicy Bypass -File (Join-Path $cfg 'nexus\configure-nexus.ps1')
+        Say 'dock configured' 'Green'
+    } else { Say 'Nexus not installed - run install.ps1' 'DarkYellow' }
+
+    # The native taskbar is reduced to the tray pill by Windhawk's Taskbar Styler. Its settings
+    # live under HKLM, so they need an elevated shell and cannot be applied from here.
+    $stylerSet = (reg query 'HKLM\SOFTWARE\Windhawk\Engine\Mods\windows-11-taskbar-styler\Settings' 2>$null | Out-String) -match 'SystemTrayFrameGrid'
+    if ($stylerSet) { Say 'tray pill: Taskbar Styler already configured' 'DarkGray' }
+    else {
+        Say 'tray pill: install "Windows 11 Taskbar Styler" in Windhawk, then in an ADMIN PowerShell run:' 'DarkYellow'
+        Say "  powershell -NoProfile -ExecutionPolicy Bypass -File `"$(Join-Path $cfg 'windhawk\apply-taskbar-styler.ps1')`"" 'DarkYellow'
     }
 
     Head '[2/11] komorebi + whkd'
@@ -346,7 +360,7 @@ if (-not $SkipConfigs) {
     #
     # Already off by default, nothing to do: Everything (check_for_updates_on_startup
     # /beta_updates are 0 out of the box), komorebi/whkd/masir/AutoHotkey/btop4win
-    # (no built-in updater), TranslucentTB (no built-in updater).
+    # (no built-in updater).
     # Flow Launcher's AutoUpdates/AutoUpdatePlugins are handled in the plugin
     # cleanup step above.
 
@@ -570,8 +584,8 @@ public class GruvWallpaper {
     Say "Aero Snap (drag-to-edge/top) re-enabled; Win+arrow stays komorebi's" 'Green'
 
     # ---- taskbar ---------------------------------------------------------
-    # Centred, with labels always shown: this is what produces the labelled
-    # taskbar buttons. TranslucentTB then removes the background.
+    # Centred, with labels always shown. The Taskbar Styler now hides every button and keeps
+    # only the tray pill, so these only matter if the styler mod is turned off.
     $adv = 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced'
     New-ItemProperty $adv -Name TaskbarAl          -Value 1 -PropertyType DWord -Force | Out-Null
     New-ItemProperty $adv -Name TaskbarGlomLevel   -Value 2 -PropertyType DWord -Force | Out-Null
