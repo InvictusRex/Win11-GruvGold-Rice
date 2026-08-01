@@ -62,9 +62,7 @@ $bin = @{
     komorebic   = Find-Exe 'komorebic' @('%ProgramFiles%\komorebi\bin\komorebic.exe', '%LOCALAPPDATA%\Microsoft\WinGet\Links\komorebic.exe')
     flow        = Find-Exe 'Flow.Launcher' @('%LOCALAPPDATA%\FlowLauncher\Flow.Launcher.exe', '%LOCALAPPDATA%\FlowLauncher\app-*\Flow.Launcher.exe')
     rainmeter   = Find-Exe 'Rainmeter' @('%ProgramFiles%\Rainmeter\Rainmeter.exe')
-    # TranslucentTB ships from the Store as an MSIX; its execution alias is
-    # ttb.exe inside a package-family folder, not TranslucentTB.exe.
-    ttb         = Find-Exe 'ttb' @('%LOCALAPPDATA%\Microsoft\WindowsApps\28017CharlesMilette.TranslucentTB_v826wp6bftszj\ttb.exe', '%LOCALAPPDATA%\Microsoft\WindowsApps\ttb.exe')
+    nexus       = Find-Exe 'Nexus' @('%ProgramFiles(x86)%\Winstep\Nexus.exe')
     ahk         = Find-Exe 'AutoHotkey64' @('%LOCALAPPDATA%\Programs\AutoHotkey\v2\AutoHotkey64.exe', '%ProgramFiles%\AutoHotkey\v2\AutoHotkey64.exe', '%ProgramFiles%\AutoHotkey\AutoHotkey64.exe')
     masir       = Find-Exe 'masir' @('%ProgramFiles%\masir\bin\masir.exe')
     everything  = Find-Exe 'Everything' @('%ProgramFiles%\Everything\Everything.exe', '%ProgramFiles(x86)%\Everything\Everything.exe')
@@ -82,7 +80,7 @@ if ($Stop -or $Restart) {
         & $bin.komorebic stop --whkd 2>&1 | Out-Null
         Say 'komorebi stopped cleanly' 'Green'
     }
-    foreach ($p in 'yasb', 'whkd', 'Flow.Launcher', 'Rainmeter', 'TranslucentTB', 'AutoHotkey64', 'masir', 'Everything') {
+    foreach ($p in 'yasb', 'whkd', 'Flow.Launcher', 'Rainmeter', 'Nexus', 'AutoHotkey64', 'masir', 'Everything') {
         $proc = Get-Process -Name $p -ErrorAction SilentlyContinue
         if ($proc) { $proc | Stop-Process -Force -ErrorAction SilentlyContinue; Say "stopped $p" 'Green' }
     }
@@ -113,7 +111,7 @@ if (Get-Process Everything -ErrorAction SilentlyContinue | Where-Object { $_.Ses
 } else {
     Launch 'Everything' $bin.everything '-startup' $null
 }
-Launch 'TranslucentTB'  $bin.ttb       $null                     'TranslucentTB'
+Launch 'Nexus dock'     $bin.nexus     $null                     'Nexus'
 Launch 'YASB'           $bin.yasb      $null                     'yasb'
 Launch 'Flow Launcher'  $bin.flow      $null                     'Flow.Launcher'
 Launch 'Rainmeter'      $bin.rainmeter $null                     'Rainmeter'
@@ -207,7 +205,7 @@ if ($bin.rainmeter) {
 # wait for Explorer/network to settle - that burst was the actual cause of
 # the slow-to-paint bar, the stray focused Explorer window, and the wifi
 # widget showing its raw template. Re-running start.ps1 keeps the ordering
-# and sleeps already coded above (TranslucentTB -> YASB -> ... -> komorebi).
+# and sleeps already coded above (Nexus -> YASB -> ... -> komorebi).
 if ($Autostart) {
     Write-Host "`nRegistering autostart" -ForegroundColor Yellow
     $startup = [Environment]::GetFolderPath('Startup')
