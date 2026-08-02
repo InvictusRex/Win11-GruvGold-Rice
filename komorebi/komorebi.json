@@ -52,7 +52,6 @@
     { "kind": "Exe", "id": "yasb.exe", "matching_strategy": "Equals" },
     { "kind": "Exe", "id": "Rainmeter.exe", "matching_strategy": "Equals" },
     { "kind": "Exe", "id": "Flow.Launcher.exe", "matching_strategy": "Equals" },
-    { "kind": "Exe", "id": "TranslucentTB.exe", "matching_strategy": "Equals" },
     { "kind": "Exe", "id": "Everything.exe", "matching_strategy": "Equals" },
     { "kind": "Exe", "id": "RobloxPlayerBeta.exe", "matching_strategy": "Equals" },
     { "kind": "Exe", "id": "steamwebhelper.exe", "matching_strategy": "Equals" },

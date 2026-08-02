@@ -40,6 +40,6 @@ for ($i = 0; $i -lt $styles.Count; $i++) {
     }
 }
 $key.SetValue('clickThroughTaskbar', 1, 'DWord')               # empty bar area must not eat clicks
-$key.SetValue('xamlDiagnosticsHandling', 'block', 'String')    # no other XAML consumer (TranslucentTB crashed on it)
+$key.SetValue('xamlDiagnosticsHandling', 'block', 'String')    # Explorer has one XAML diagnostics slot; stop other tools taking it
 # The mod reloads when this changes (it lives on the mod key, not Settings); the UI writes the unix time.
 $mod.SetValue('SettingsChangeTime', [int][DateTimeOffset]::UtcNow.ToUnixTimeSeconds(), 'DWord')
