@@ -65,7 +65,8 @@ images to `%LOCALAPPDATA%\GruvGoldRice`. Editing the clone changes nothing until
 | What | Tool | Config |
 |---|---|---|
 | Top bar | [YASB](https://github.com/amnweb/yasb) | `yasb/` |
-| Bottom bar, tray, notifications | native Windows taskbar + [TranslucentTB](https://github.com/TranslucentTB/TranslucentTB) | `translucenttb/`, Windows settings |
+| Bottom apps dock | [Nexus](https://www.winstep.net/nexus.html), pinned apps with running indicators | `nexus/configure-nexus.ps1` |
+| Tray, notifications | native Windows taskbar, reduced to a tray pill by Windhawk's Taskbar Styler | `windhawk/apply-taskbar-styler.ps1` |
 | Desktop clock + audio visualiser | [Rainmeter](https://www.rainmeter.net/) | `rainmeter/` |
 | Launcher | [Flow Launcher](https://www.flowlauncher.com/) + [Everything](https://www.voidtools.com/) for file search | `flow-launcher/` |
 | Win key → launcher, type-on-desktop → launcher, Space+Enter → terminal | [AutoHotkey v2](https://www.autohotkey.com/) | `ahk/desktop-type-to-launch.ahk` |
@@ -79,9 +80,35 @@ The top bar holds the clock and network traffic on the left, the active window t
 the centre, and media, Wi-Fi, Bluetooth, battery, a control centre, the Recycle Bin and a
 full-screen power menu on the right.
 
-The bottom bar is the stock Windows taskbar, centred with labels, with TranslucentTB
-making its background fully transparent, so only the buttons and tray float over the
-wallpaper.
+The bottom of the screen is two separate pieces:
+
+- **Apps dock** - Nexus, centred, auto-hiding, floating 10px off the edge. It slides in and
+  out with no overshoot, and stays above other windows without taking focus from them: the
+  AutoHotkey script keeps it topmost and hands focus back the moment the pointer leaves it.
+  Pins point at each app's real exe so running windows merge into their icon (a dot under
+  it) instead of appearing separately; only pinned apps are shown. Spotify is the exception:
+  Windows refuses to start it from inside `WindowsApps`, so it pins its launch alias and
+  shows no dot while running. Icons are generated from each app's own icon, graded to
+  gruvbox-dark on a `#1d2021` tile; the dock logo is `nexus/logo.png`.
+  `configure-nexus.ps1` (run from Windows PowerShell 5.1, not pwsh 7) writes all of it into
+  Nexus' registry key. Store apps keep their version in the install path, so re-run it after
+  such an app updates.
+- **Tray pill** - the **native taskbar** (so the tray, bell and Quick Settings still work),
+  with every button hidden and the tray frame styled as a `#0D0C09`/82% pill by Windhawk's
+  *Windows 11 Taskbar Styler*. Install that mod from Windhawk's window, then run
+  `windhawk/apply-taskbar-styler.ps1` from an **elevated** PowerShell (the mod's settings
+  are under HKLM). It uses the registry API because the setting names contain `[`, a
+  wildcard to `*-ItemProperty`. The date/time and the keyboard-language indicator are
+  hidden from the pill; the bell next to them still opens the notification centre and
+  calendar.
+
+The pill only appears from the bottom-right corner: `desktop-type-to-launch.ahk` holds the
+pointer 3px short of the screen edge everywhere else (Explorer reveals the taskbar from the
+last 2px only), while Nexus (`EdgeBufferZone=6`) reveals the dock from the whole edge. Both
+bars appear in the corner itself.
+
+TranslucentTB is not used: it and the styler both need Explorer's one XAML-diagnostics slot,
+and TranslucentTB fails with `0x80070102` when the styler holds it.
 
 ---
 
@@ -141,7 +168,7 @@ anything that failed (usually a declined elevation prompt; re-run in an admin sh
 |---|---|
 | `Microsoft.PowerShell` | PowerShell 7 |
 | `AmN.yasb` | top bar |
-| `CharlesMilette.TranslucentTB` | transparent taskbar |
+| `WinStep.Nexus` | bottom apps dock |
 | `Flow-Launcher.Flow-Launcher` | launcher |
 | `voidtools.Everything` | instant file search for Flow |
 | `AutoHotkey.AutoHotkey` | Win key, desktop typing, snapping, Win+D |
@@ -169,9 +196,10 @@ terminal afterwards so the new commands are on `PATH`.
 
 1. **YASB**: `config.yaml` and `styles.css`. The profile picture goes to
    `%LOCALAPPDATA%\GruvGoldRice\theme\profile.png`, and its absolute path is written into
-   the deployed config. It also seeds TranslucentTB's `settings.json` if there is none, so
-   TranslucentTB stops showing its first-run dialog at every boot. An existing one is
-   never overwritten.
+   the deployed config.
+   1b. **Nexus dock**: starts Nexus once if it has never run, then `nexus/configure-nexus.ps1`
+   writes the dock settings and pinned apps into its registry key. If the Taskbar Styler is
+   not configured yet, it prints the one elevated command that does it.
 2. **komorebi + whkd**: `komorebi.json` and `whkdrc`. It also downloads the community
    `applications.json` rule set for apps that misbehave when tiled.
 3. **Flow Launcher theme**: installs `GruvGold.xaml` and selects it. The window is 1000
@@ -212,7 +240,8 @@ terminal afterwards so the new commands are on `PATH`.
 - The Windows accent-colour window border is turned off; komorebi draws the focus border
   instead.
 - Aero Snap drag-to-edge stays on; Win+arrow belongs to whkd.
-- Taskbar centred, with labels always shown and buttons never combined.
+- Taskbar centred, with labels always shown and buttons never combined (the Taskbar Styler hides
+  the buttons, so this only matters with that mod off).
 - Native Win+D is disabled, so it doesn't fight the rice's own Win+D.
 - Lock screen image: set per user through the WinRT `LockScreen` API, so it needs no admin and
   works on Windows Home. The clock keeps Windows' font.
@@ -228,7 +257,7 @@ terminal afterwards so the new commands are on `PATH`.
 .\scripts\start.ps1 -Autostart   # also start at every login
 ```
 
-It starts things in this order: Everything, TranslucentTB, YASB, Flow Launcher, Rainmeter,
+It starts things in this order: Everything, Nexus, YASB, Flow Launcher, Rainmeter,
 the AutoHotkey desktop hook, then komorebi with whkd. Anything already running is left
 alone. Once komorebi is up it sets things over its CLI that this komorebi version does
 not reliably take from `komorebi.json`:
@@ -312,7 +341,8 @@ once you are sure.
 | btop launcher plugin | `%APPDATA%\FlowLauncher\Plugins\Btop\` |
 | Rainmeter skins | `~\Documents\Rainmeter\Skins\GruvGold\` |
 | AutoHotkey scripts, `start.ps1`, `exam-mode.ps1`, wallpaper, profile picture | `%LOCALAPPDATA%\GruvGoldRice\` |
-| TranslucentTB settings (only if none exist) | TranslucentTB's package `RoamingState` |
+| Nexus settings and pinned apps | `HKCU\Software\WinSTEP2000\NeXuS` |
+| Nexus pin icons and logo | `%LOCALAPPDATA%\GruvGoldRice\nexus\` |
 | Autostart shortcut | `shell:startup\GruvGold - Startup.lnk` |
 | Backups | `%LOCALAPPDATA%\GruvGoldRice-backup\` |
 | Prompt name (`-Name`) | user environment variable `GRUVGOLD_NAME` |
@@ -429,11 +459,11 @@ btop/                    btop theme and config
 fastfetch/               fastfetch config and the dragon logo
 flow-launcher/           theme, icons, ExamMode and Btop plugins, Plugin Indicator patch
 komorebi/                komorebi.json, whkdrc
+nexus/                   Nexus dock configuration script and logo
 powershell/              prompt, input colours, greeting, exam:, btop alias
 rainmeter/               clock and visualiser skins
 terminal/                Windows Terminal colour scheme fragment
-translucenttb/           seed settings for TranslucentTB
-windhawk/                settings and patches for the Explorer mods
+windhawk/                settings and patches for the Explorer mods, Taskbar Styler script
 yasb/                    bar config and styles
 cols.csv                 colour samples behind the palette
 ```
@@ -457,7 +487,10 @@ after `install.ps1`:
    background effect `None`, plus the control styles in `windhawk/file-explorer-styler.json`.
 4. Install **Explorer Font Changer**, apply `windhawk/explorer-font-changer.patch` (adds a
    *Font size scale* setting), compile, and use `windhawk/explorer-font-changer.json`.
-5. Restart Explorer.
+5. Install **Windows 11 Taskbar Styler** (the tray pill, see [Components](#components)), then
+   run `windhawk/apply-taskbar-styler.ps1` from an elevated PowerShell. Leave the mod's
+   XAML diagnostics handling on *block* so no other tool competes for Explorer's one slot.
+6. Restart Explorer.
 
 A hook that stops matching after a Windows update simply does not load; nothing breaks. If
 Explorer misbehaves, quit Windhawk from the tray, run `windhawk.exe -safe-mode`, or uninstall
@@ -482,6 +515,9 @@ it from Settings → Apps. Mods that Windhawk compiles are not part of this repo
   them fires; give one a different key if you need both.
 - **Flow Launcher content search** stays on the Windows index. Everything's content
   search was tried, and it reproducibly hung Flow's search engine.
+- **Bottom edge.** The last 3 pixel rows of the screen are unreachable by the pointer outside
+  the bottom-right corner (that is how the tray pill is kept out of the dock's reveal zone).
+  `Ctrl+Alt+D` suspends this along with desktop typing.
 - **Desktop typing** replaces Explorer's "jump to the icon starting with that letter".
   `Ctrl+Alt+D` turns it off.
 - **Display scaling.** YASB sizes are logical pixels and were tuned at 150%.
