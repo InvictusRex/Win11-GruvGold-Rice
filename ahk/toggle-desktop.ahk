@@ -34,7 +34,7 @@ DetectHiddenWindows True   ; see first-press loop; also needed to restore cloake
 stateFile := A_Temp . "\gruvgold-desktop.txt"
 lastFile  := A_Temp . "\gruvgold-desktop-last.txt"
 
-EXCLUDE := ["yasb.exe", "Rainmeter.exe", "TranslucentTB.exe", "komorebi.exe", "AutoHotkey64.exe", "TextInputHost.exe"]
+EXCLUDE := ["yasb.exe", "Rainmeter.exe", "Nexus.exe", "komorebi.exe", "AutoHotkey64.exe", "TextInputHost.exe"]
 EXCLUDE_CLASS := ["Progman", "WorkerW", "Shell_TrayWnd", "Shell_SecondaryTrayWnd"]
 
 ; Same guard as snap-half.ahk: A_TickCount resets on reboot, so only treat a
