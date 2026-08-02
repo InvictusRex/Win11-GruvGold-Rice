@@ -1,8 +1,8 @@
 # YASB - GruvGold
 #
-# The bottom bar is the NATIVE Windows taskbar made transparent
-# by TranslucentTB, not a YASB bar - that is why the tray and notification bell
-# still work. This config deliberately does NOT use YASB's systray/taskbar widgets:
+# The bottom of the screen is not a YASB bar: the apps are a Nexus dock and the tray is
+# the NATIVE Windows taskbar reduced to a pill by Windhawk - that is why the tray and
+# notification bell still work. This config deliberately does NOT use YASB's systray/taskbar widgets:
 # two trays competing for the same "TaskbarCreated" broadcast is a known upstream
 # conflict (amnweb/yasb#324).
 #
