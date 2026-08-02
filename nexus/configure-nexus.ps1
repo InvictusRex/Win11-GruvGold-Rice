@@ -132,8 +132,12 @@ public static class PinIcon {
 # Resolve a pin to (exe, source bitmap). Store apps: exe from the package manifest, icon
 # from the package's 256px logo (their exes often carry no usable icon).
 function Resolve-Pin($spec, $exeName) {
-    if ($spec -notmatch '!') { return @{ Exe = $spec; Bmp = [PinIcon]::FromExe($spec) } }
+    if ($spec -notmatch '!') {
+        if (-not (Test-Path $spec)) { throw "not found: $spec" }
+        return @{ Exe = $spec; Bmp = [PinIcon]::FromExe($spec) }
+    }
     $pkg = Get-AppxPackage | Where-Object { $_.PackageFamilyName -eq $spec.Split('!')[0] } | Select-Object -First 1
+    if (-not $pkg) { throw "package not installed: $($spec.Split('!')[0])" }
     $app = ([xml](Get-Content "$($pkg.InstallLocation)\AppxManifest.xml")).Package.Applications.Application |
         Where-Object Id -eq $spec.Split('!')[1]
     $stem = Join-Path $pkg.InstallLocation ([IO.Path]::ChangeExtension($app.VisualElements.Square44x44Logo, $null).TrimEnd('.'))
@@ -160,7 +164,9 @@ $pinSpecs = @(
     @('WhatsApp',      '5319275A.WhatsAppDesktop_cv1g1gvanyjgm!App')
 )
 $items = foreach ($p in $pinSpecs) {
-    $r = Resolve-Pin $p[1] $p[2]
+    # An app that is not installed on this machine is left off the dock rather than failing the run.
+    try { $r = Resolve-Pin $p[1] $p[2] }
+    catch { Write-Warning "skipping pin '$($p[0])': $($_.Exception.Message)"; continue }
     $icoPath = "$assets\pins\$($p[0]).ico"
     [IO.File]::WriteAllBytes($icoPath, [PinIcon]::ToPinIco($r.Bmp))
     , @($p[0], $r.Exe, $icoPath)
