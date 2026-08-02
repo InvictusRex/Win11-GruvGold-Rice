@@ -176,6 +176,47 @@ BottomEdgeHook(nCode, wParam, lParam) {
     return DllCall("CallNextHookEx", "Ptr", 0, "Int", nCode, "Ptr", wParam, "Ptr", lParam, "Ptr")
 }
 
+; ---------------------------------------------------------------- dock focus
+; Nexus takes the foreground when the dock pops up and only gives it back after the hide
+; slide has finished, about 0.3s after the pointer left - so typing goes nowhere in between.
+; Hand it back the moment the pointer is off the dock: to the window under the pointer, or
+; the last window that was in use if the pointer is over the desktop, a bar or the dock.
+DockFocusBack() {
+    static prev := 0, dock := "NxDock ahk_class ThunderRT5Form"
+    hwnd := WinExist("A")
+    if !WinActive(dock) {
+        if hwnd
+            prev := hwnd
+        return
+    }
+    WinGetPos &x, &y, &w, &h, dock
+    MouseGetPos &mx, &my, &under
+    if (mx >= x && mx < x + w && my >= y && my < y + h)
+        return
+    target := under
+    try {
+        cls := WinGetClass(target)
+        if (cls = "Progman" || cls = "WorkerW" || cls = "Shell_TrayWnd" || cls = "ThunderRT5Form"
+            || cls = "RainmeterMeterWindow" || WinGetProcessName(target) = "yasb.exe")
+            target := prev
+    } catch
+        target := prev
+    if (target && WinExist(target))
+        WinActivate target
+}
+SetTimer DockFocusBack, 15
+
+; Nexus normally lifts the dock over other windows when the pointer bumps the very edge,
+; which the clamp above prevents - the dock would then reveal behind the active window.
+; Keep it topmost instead (no activation, so it never takes focus). It is transparent
+; while hidden, so being topmost all the time costs nothing visible.
+DockOnTop() {
+    DetectHiddenWindows true
+    if (hwnd := WinExist("NxDock ahk_class ThunderRT5Form")) && !(WinGetExStyle(hwnd) & 0x8)
+        DllCall("SetWindowPos", "Ptr", hwnd, "Ptr", -1, "Int", 0, "Int", 0, "Int", 0, "Int", 0, "UInt", 0x13)
+}
+SetTimer DockOnTop, 250
+
 ; Kept in globals so the callback and hook handle are not freed.
 BottomEdgeCb := CallbackCreate(BottomEdgeHook, "Fast", 3)
 BottomEdgeHookHandle := DllCall("SetWindowsHookEx", "Int", 14, "Ptr", BottomEdgeCb
