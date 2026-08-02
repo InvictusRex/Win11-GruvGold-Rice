@@ -1,7 +1,7 @@
 # GruvGold — a Windows 11 rice
 
-Gruvbox Dark on a pure-black base with a gold accent: a top bar, a floating transparent
-taskbar, tiling with gold borders, a keyboard-driven launcher, a desktop clock with an
+Gruvbox Dark on a pure-black base with a gold accent: a top bar, a floating apps dock and
+tray pill, tiling with gold borders, a keyboard-driven launcher, a desktop clock with an
 audio visualiser, and a translucent terminal that greets you with fastfetch.
 
 **Nothing here modifies Windows itself.** No theme-signature patching, no `explorer.exe`
@@ -48,6 +48,8 @@ Set-ExecutionPolicy -Scope Process Bypass -Force   # allow the scripts for this 
 #   create the settings files the next step edits, then open a NEW terminal
 .\scripts\apply.ps1             # 3. deploy the configs and Windows settings
 .\scripts\start.ps1 -Autostart  # 4. start everything, and again at every login
+#   once, for the tray pill: install "Windows 11 Taskbar Styler" in Windhawk, then in an
+#   ADMIN PowerShell run .\windhawk\apply-taskbar-styler.ps1 (details under Windhawk below)
 ```
 
 Every script is safe to re-run. `apply.ps1` reports anything it had to skip (usually an
@@ -92,7 +94,8 @@ The bottom of the screen is two separate pieces:
   gruvbox-dark on a `#1d2021` tile; the dock logo is `nexus/logo.png`.
   `configure-nexus.ps1` (run from Windows PowerShell 5.1, not pwsh 7) writes all of it into
   Nexus' registry key. Store apps keep their version in the install path, so re-run it after
-  such an app updates.
+  such an app updates. The pin list is `pinSpecs` at the top of that script, and an app that
+  is not installed on the machine is skipped, so edit it to match your own apps.
 - **Tray pill** - the **native taskbar** (so the tray, bell and Quick Settings still work),
   with every button hidden and the tray frame styled as a `#0D0C09`/82% pill by Windhawk's
   *Windows 11 Taskbar Styler*. Install that mod from Windhawk's window, then run
@@ -107,8 +110,8 @@ pointer 3px short of the screen edge everywhere else (Explorer reveals the taskb
 last 2px only), while Nexus (`EdgeBufferZone=6`) reveals the dock from the whole edge. Both
 bars appear in the corner itself.
 
-TranslucentTB is not used: it and the styler both need Explorer's one XAML-diagnostics slot,
-and TranslucentTB fails with `0x80070102` when the styler holds it.
+Run no other taskbar-styling tool next to the Taskbar Styler: Explorer has a single
+XAML-diagnostics slot, so a second tool fails to start or the mod shows a conflict dialog.
 
 ---
 
@@ -205,7 +208,9 @@ terminal afterwards so the new commands are on `PATH`.
 3. **Flow Launcher theme**: installs `GruvGold.xaml` and selects it. The window is 1000
    logical px wide and centred on the focused monitor, with up to 8 results.
 4. **Everything backend**: switches Flow's file search and path search to Everything.
-   Content search stays on the Windows index.
+   Content search stays on the Windows index. AppData, every dot-folder and dotfile in the
+   profile, and `D:\config` are excluded from the index (Everything is closed while its ini
+   is edited, and the index is rebuilt when the exclusions change).
 5. **Flow plugin cleanup**:
    - Web searches are trimmed to Google (the fallback), Scholar (`sc:`, with its own
      icon), Maps (`maps:`), Translate (`translate:`), Gmail (`gmail:`) and YouTube
@@ -217,6 +222,7 @@ terminal afterwards so the new commands are on `PATH`.
      `home`, `github` or `btop` finds the same shortcut. This needs the patched Plugin
      Indicator, built from `flow-launcher/plugin-indicator-patch/`.
    - Browser Bookmarks is disabled, and plugin auto-updates are turned off.
+   - The Program plugin merges duplicate Windows apps (one Notepad, one Paint).
    - If Python 3 is found, it installs the ExamMode plugin (`exam:` then `on`).
 6. **Stop auto-updates**: turns off Rainmeter's update check and PowerShell 7's "new
    version available" notice.
@@ -243,6 +249,8 @@ terminal afterwards so the new commands are on `PATH`.
 - Taskbar centred, with labels always shown and buttons never combined (the Taskbar Styler hides
   the buttons, so this only matters with that mod off).
 - Native Win+D is disabled, so it doesn't fight the rice's own Win+D.
+- Touchpad three-finger swipe down is set to a Win+D custom shortcut, so the gesture goes through
+  `toggle-desktop.ahk` instead of Windows' own Show Desktop, which would minimise the bar.
 - Lock screen image: set per user through the WinRT `LockScreen` API, so it needs no admin and
   works on Windows Home. The clock keeps Windows' font.
 - Explorer is restarted so the taskbar changes apply.
@@ -398,7 +406,7 @@ The modifier is **Alt**, since Windows reserves most `Win` combinations.
 | `Win + ↑` | top half | fills the screen |
 | `Win + ↓` | bottom half | minimise |
 | `Win + ←` / `Win + →` | left / right half | back into the tiling |
-| `Win + D` | minimise all windows (the bar and widgets stay) | restore them |
+| `Win + D`, touchpad three-finger swipe down | minimise all windows (the bar and widgets stay) | restore them |
 
 ---
 
