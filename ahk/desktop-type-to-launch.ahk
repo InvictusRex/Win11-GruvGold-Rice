@@ -149,3 +149,34 @@ TrayTip "desktop-type-to-launch", "Running. Win opens the launcher; Ctrl+Alt+D t
 #HotIf WinActive("btop4win++ ahk_exe WindowsTerminal.exe")
 ^c::Send "q"
 #HotIf
+
+; ---------------------------------------------------------------- bottom edge
+; Two auto-hide bars share the bottom edge: the Nexus dock (apps) and the native taskbar,
+; which Windhawk reduces to the tray pill. Explorer reveals the taskbar from the whole edge,
+; so the pill used to pop up wherever the pointer touched the bottom.
+; Explorer reacts only to the last 2 pixel rows; Nexus (EdgeBufferZone=6, see
+; configure-nexus.ps1) reacts from 6 rows up. So outside the bottom-right corner the pointer
+; is held just short of Explorer's rows (the dock still triggers) and only inside the corner
+; may it reach the edge itself (the pill shows). Nexus triggers there too, so both bars appear
+; in the corner - the dock cannot be kept out without also losing its trigger elsewhere.
+; The pointer is moved from a low-level mouse hook: Windows applies the clamp before any
+; program sees the unclamped position.
+TRAY_CORNER_W := 300    ; width of the corner that reaches the edge, physical px
+EDGE_HELD_ROWS := 3     ; rows above the screen edge the pointer cannot enter elsewhere
+
+BottomEdgeHook(nCode, wParam, lParam) {
+    if (nCode = 0 && wParam = 0x200 && !A_IsSuspended) {     ; WM_MOUSEMOVE
+        x := NumGet(lParam, 0, "Int"), y := NumGet(lParam, 4, "Int")
+        limit := A_ScreenHeight - 1 - EDGE_HELD_ROWS
+        if (y > limit && x >= 0 && x < A_ScreenWidth - TRAY_CORNER_W) {
+            DllCall("SetCursorPos", "Int", x, "Int", limit)
+            return 1                                         ; swallow the unclamped move
+        }
+    }
+    return DllCall("CallNextHookEx", "Ptr", 0, "Int", nCode, "Ptr", wParam, "Ptr", lParam, "Ptr")
+}
+
+; Kept in globals so the callback and hook handle are not freed.
+BottomEdgeCb := CallbackCreate(BottomEdgeHook, "Fast", 3)
+BottomEdgeHookHandle := DllCall("SetWindowsHookEx", "Int", 14, "Ptr", BottomEdgeCb
+                                , "Ptr", DllCall("GetModuleHandle", "Ptr", 0, "Ptr"), "UInt", 0, "Ptr")
