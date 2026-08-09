@@ -234,7 +234,8 @@ terminal afterwards so the new commands are on `PATH`.
    Blocks added to the profiles by older versions of the rice are removed.
 9. **btop theme and config**: the theme in `~\.config\btop\themes` and next to the btop binary,
    and the full `btop.conf` beside the binary (btop rewrites it on exit).
-10. **Rainmeter skins**: the clock and the visualiser.
+10. **Rainmeter skins**: the clock and the visualiser, plus the clock's position in
+    `Rainmeter.ini` (bottom centre, high enough to clear the raised Nexus dock).
 11. **AutoHotkey scripts and rice scripts**: the three `.ahk` files, plus `start.ps1` and
     `exam-mode.ps1`, go to `%LOCALAPPDATA%\GruvGoldRice`.
 
@@ -348,6 +349,7 @@ once you are sure.
 | btop theme and config | `~\.config\btop\themes\` and next to `btop4win.exe` |
 | btop launcher plugin | `%APPDATA%\FlowLauncher\Plugins\Btop\` |
 | Rainmeter skins | `~\Documents\Rainmeter\Skins\GruvGold\` |
+| Rainmeter clock position | `%APPDATA%\Rainmeter\Rainmeter.ini`, `[GruvGold\Clock]` |
 | AutoHotkey scripts, `start.ps1`, `exam-mode.ps1`, wallpaper, profile picture | `%LOCALAPPDATA%\GruvGoldRice\` |
 | Nexus settings and pinned apps | `HKCU\Software\WinSTEP2000\NeXuS` |
 | Nexus pin icons and logo | `%LOCALAPPDATA%\GruvGoldRice\nexus\` |

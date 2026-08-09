@@ -524,6 +524,17 @@ $marker
     Head '[10/11] Rainmeter skins'
     Deploy (Join-Path $cfg 'rainmeter\Skins\GruvGold') "$env:USERPROFILE\Documents\Rainmeter\Skins\GruvGold"
 
+    # Skin positions live in Rainmeter.ini and win over anything in the skin.
+    # Bottom-centre clock, high enough to stay clear of the raised Nexus dock.
+    # WritePrivateProfileString keeps the file's UTF-16 encoding and adds the section if missing.
+    if (Test-Path $rainmeterIni) {
+        Add-Type -Namespace Win32 -Name Ini -MemberDefinition '[DllImport("kernel32.dll", CharSet = CharSet.Unicode)] public static extern bool WritePrivateProfileString(string section, string key, string value, string file);'
+        foreach ($kv in ([ordered]@{ WindowX = '50%'; WindowY = '83.125%'; AnchorX = '50%'; AnchorY = '0' }).GetEnumerator()) {
+            [Win32.Ini]::WritePrivateProfileString('GruvGold\Clock', $kv.Key, $kv.Value, $rainmeterIni) | Out-Null
+        }
+        Say "Rainmeter: clock position set" 'Green'
+    }
+
     Head '[11/11] AutoHotkey + rice scripts'
     Deploy (Join-Path $cfg 'ahk\desktop-type-to-launch.ahk') "$live\desktop-type-to-launch.ahk"
     # Invoked per keypress by whkdrc for Win+Up / Win+Down / Win+Left / Win+Right, not run resident.
