@@ -168,7 +168,10 @@ widgets:
         on_right: "toggle_label"
 
   # ============================================================== system group
-  # Click opens YASB's own network menu - available networks, connect/disconnect.
+  # Click opens YASB's own network menu - Wi-Fi on/off, available networks,
+  # connect/disconnect, and a username field for WPA2/WPA3-Enterprise networks.
+  # The radio switch, tooltip, wifi_off_icon and the username sign-in come from
+  # the rice's YASB patches (yasb/patches, applied by yasb/patch-yasb.ps1).
   wifi:
     type: "yasb.wifi.WifiWidget"
     options:
@@ -189,6 +192,8 @@ widgets:
         - "󰤢"
         - "󰤥"
         - "󰤨"
+      # No internet or radio off: the fan with a slash through it, like bluetooth_off.
+      wifi_off_icon: "󰖪"
       menu_config:
         blur: true
         round_corners: true

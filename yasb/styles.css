@@ -314,7 +314,8 @@
     padding: 8px 16px 4px;
 }
 
-/* The bluetooth radio on/off switch, top-right of the header. */
+/* The radio on/off switch, top-right of the header. */
+.wifi-menu .power-button,
 .bluetooth-menu .power-button {
     background-color: #282421;
     border: 1px solid #3A342B;
@@ -324,6 +325,7 @@
     padding: 4px 12px;
 }
 
+.wifi-menu .power-button:checked,
 .bluetooth-menu .power-button:checked {
     background-color: #D5AC45;
     border: 1px solid #D5AC45;
@@ -413,8 +415,9 @@
     font-size: 13px;
 }
 
-/* Connect / Disconnect and the password field. Neither carries a class of its
-   own, so they are matched on their Qt type. */
+/* Connect / Disconnect and the username / password fields. Matched on their Qt
+   type, so these also reach the header's power-button - its rules above are
+   more specific and win. */
 .wifi-menu QPushButton,
 .bluetooth-menu QPushButton {
     background-color: #282421;
