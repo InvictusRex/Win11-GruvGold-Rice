@@ -10,7 +10,8 @@ Windhawk, limited to `explorer.exe` (see [Windhawk](#windhawk-explorer-transluce
 application drawing on top of the normal shell, so `explorer.exe` keeps owning the tray,
 toasts, jump lists and file dialogs. The worst case to undo it is stopping a handful of
 processes, and `uninstall.ps1` restores the settings it changed from a backup taken
-first.
+first. The one installed app that is modified is YASB, whose own Python modules are
+patched (see [YASB patches](#yasb-patches)) - `patch-yasb.ps1 -Restore` puts the stock ones back.
 
 ---
 
@@ -47,6 +48,7 @@ Set-ExecutionPolicy -Scope Process Bypass -Force   # allow the scripts for this 
 #   now open Flow Launcher, Rainmeter and Windows Terminal once each, so they
 #   create the settings files the next step edits, then open a NEW terminal
 .\scripts\apply.ps1             # 3. deploy the configs and Windows settings
+#   in an ADMIN PowerShell: .\yasb\patch-yasb.ps1  (the bar config needs these patches)
 .\scripts\start.ps1 -Autostart  # 4. start everything, and again at every login
 #   once, for the tray pill: install "Windows 11 Taskbar Styler" in Windhawk, then in an
 #   ADMIN PowerShell run .\windhawk\apply-taskbar-styler.ps1 (details under Windhawk below)
@@ -81,6 +83,29 @@ images to `%LOCALAPPDATA%\GruvGoldRice`. Editing the clone changes nothing until
 The top bar holds the clock and network traffic on the left, the active window title in
 the centre, and media, Wi-Fi, Bluetooth, battery, a control centre, the Recycle Bin and a
 full-screen power menu on the right.
+
+### YASB patches
+
+Some of the bar is not stock YASB. `yasb/patches/` holds patched copies of YASB 2.0.7's own
+modules, laid out at their paths inside YASB's `lib\library.zip`, and
+`yasb/patch-yasb.ps1` (admin) swaps them in for the compiled originals. YASB loads the
+source directly, so no Python is needed. `config.yaml` uses options only the patches
+provide, so stock YASB rejects it; `apply.ps1` checks and prints the command when they are
+missing or out of date, and `install.ps1` pins YASB to 2.0.7 because the patches replace
+whole modules of that release.
+
+- **Wi-Fi**: an on/off switch in the menu header; a slashed icon (`wifi_off_icon`) instead
+  of a clipped "N/A" when there is no internet or the radio is off; a username field as
+  well as the password for WPA2/WPA3-Enterprise networks; connects time out with a message
+  instead of hanging; the hover tooltip.
+- **Popups**: a menu opened while Quick Settings is up no longer closes again at once - the
+  flyout takes the foreground back as it dismisses, which used to close every popup.
+- **Media**: the audio visualizer drawn inside the media pill (`visualizer:`).
+- **Control centre and power menu**: `profile_image_path`, a sharp ringed avatar, slider
+  row labels, the settings button beside the name, centred buttons.
+
+Re-run `patch-yasb.ps1` after editing a patch; `-Restore` returns YASB to stock. A YASB
+update replaces `library.zip` and drops the patches, so stay on 2.0.7.
 
 The bottom of the screen is two separate pieces:
 
@@ -170,7 +195,7 @@ anything that failed (usually a declined elevation prompt; re-run in an admin sh
 | Package | Purpose |
 |---|---|
 | `Microsoft.PowerShell` | PowerShell 7 |
-| `AmN.yasb` | top bar |
+| `AmN.yasb` | top bar (pinned to 2.0.7, see [YASB patches](#yasb-patches)) |
 | `WinStep.Nexus` | bottom apps dock |
 | `Flow-Launcher.Flow-Launcher` | launcher |
 | `voidtools.Everything` | instant file search for Flow |
@@ -199,7 +224,8 @@ terminal afterwards so the new commands are on `PATH`.
 
 1. **YASB**: `config.yaml` and `styles.css`. The profile picture goes to
    `%LOCALAPPDATA%\GruvGoldRice\theme\profile.png`, and its absolute path is written into
-   the deployed config.
+   the deployed config. Then checks the [YASB patches](#yasb-patches) and, if they are
+   missing or out of date, prints the elevated command that applies them.
    1b. **Nexus dock**: starts Nexus once if it has never run, then `nexus/configure-nexus.ps1`
    writes the dock settings and pinned apps into its registry key. If the Taskbar Styler is
    not configured yet, it prints the one elevated command that does it.
@@ -324,7 +350,8 @@ name.
    `komorebi.json` and `whkdrc`, deletes taskbar values that did not exist before, and
    puts your old wallpaper back.
 5. With `-RemovePackages`, uninstalls the apps, except any that were installed before
-   `backup.ps1` ran.
+   `backup.ps1` ran. Without it, a patched YASB stays patched (harmless with a stock
+   config), and it prints the elevated `patch-yasb.ps1 -Restore` command that undoes that.
 
 Backups are left in place afterwards; delete `%LOCALAPPDATA%\GruvGoldRice-backup` by hand
 once you are sure.
@@ -336,6 +363,7 @@ once you are sure.
 | Deployed file(s) | Location |
 |---|---|
 | YASB `config.yaml`, `styles.css` | `~\.config\yasb\` |
+| YASB patched modules | inside `C:\Program Files\YASB\lib\library.zip` (stock copy: `library.zip.gruvgold-backup`) |
 | `komorebi.json` | `~\komorebi.json` |
 | `whkdrc` | `~\.config\whkdrc` |
 | komorebi `applications.json` (downloaded) | `~\.config\komorebi\` |
@@ -474,7 +502,7 @@ powershell/              prompt, input colours, greeting, exam:, btop alias
 rainmeter/               clock and visualiser skins
 terminal/                Windows Terminal colour scheme fragment
 windhawk/                settings and patches for the Explorer mods, Taskbar Styler script
-yasb/                    bar config and styles
+yasb/                    bar config and styles, patched YASB modules and patch-yasb.ps1
 cols.csv                 colour samples behind the palette
 ```
 

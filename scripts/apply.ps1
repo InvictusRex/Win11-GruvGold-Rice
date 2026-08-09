@@ -6,7 +6,9 @@
     Run backup.ps1 first, then install.ps1, then this.
 
     Everything here is reversible by uninstall.ps1. Nothing patches a system
-    file, replaces the shell, or injects into a process.
+    file, replaces the shell, or injects into a process. The one installed app
+    that gets modified is YASB, and only by yasb\patch-yasb.ps1, run separately
+    from an admin shell (this script reports whether it is needed).
 
     Everything is copied, never linked: the clone is only the source. Editing
     it changes nothing until this is re-run, and the rice keeps working if the
@@ -68,6 +70,15 @@ if (-not $SkipConfigs) {
     $yasbCfg = "$env:USERPROFILE\.config\yasb\config.yaml"
     $yaml = (Get-Content $yasbCfg -Raw -Encoding UTF8) -replace '(?m)^(\s*profile_image_path:)[^\r\n]*', ('$1 "' + ($live -replace '\\', '/') + '/theme/profile.png"')
     [IO.File]::WriteAllText($yasbCfg, $yaml, (New-Object System.Text.UTF8Encoding $false))
+    # The config uses options only the rice's YASB patches provide. They go into
+    # Program Files, so they need an elevated shell and cannot be applied from here.
+    $patchYasb = Join-Path $cfg 'yasb\patch-yasb.ps1'
+    powershell.exe -NoProfile -ExecutionPolicy Bypass -File $patchYasb -Check
+    if ($LASTEXITCODE -eq 0) { Say 'YASB patches already in place' 'DarkGray' }
+    else {
+        Say 'YASB patches missing or outdated - in an ADMIN PowerShell run:' 'DarkYellow'
+        Say "  powershell -NoProfile -ExecutionPolicy Bypass -File `"$patchYasb`"" 'DarkYellow'
+    }
 
     Head '[1b/11] Nexus dock (bottom apps dock)'
     $nexusExe = "${env:ProgramFiles(x86)}\Winstep\Nexus.exe"

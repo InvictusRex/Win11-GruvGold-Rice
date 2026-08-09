@@ -33,6 +33,9 @@ $packages = [ordered]@{
     'RamenSoftware.Windhawk'        = 'Windhawk (Explorer translucency, lock-screen clock font)'
 }
 
+# Pinned: yasb\patch-yasb.ps1 swaps in whole modules from this exact YASB release.
+$versions = @{ 'AmN.yasb' = '2.0.7' }
+
 if ($IncludeFont) {
     # Nerd Font for the glyphs YASB and btop need.
     # Separate flag because font installs are machine-scope and prompt for elevation.
@@ -55,7 +58,8 @@ foreach ($id in $packages.Keys) {
     }
 
     Write-Host "  $label installing..." -ForegroundColor Yellow -NoNewline
-    $log = winget install --id $id --exact --source winget --silent `
+    $versionArgs = if ($versions[$id]) { '--version', $versions[$id] } else { @() }
+    $log = winget install --id $id --exact @versionArgs --source winget --silent `
                           --accept-package-agreements --accept-source-agreements `
                           --disable-interactivity 2>&1 | Out-String
 

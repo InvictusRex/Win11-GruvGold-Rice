@@ -195,6 +195,11 @@ if ($RemovePackages) {
 } else {
     Say 'left installed (pass -RemovePackages to uninstall them)' 'DarkGray'
     Say 'Windhawk keeps running its Taskbar Styler: the taskbar stays reduced to the tray pill until you disable that mod in Windhawk.' 'DarkYellow'
+    # Restoring Program Files needs admin, so this only says how.
+    if (Test-Path "$env:ProgramFiles\YASB\lib\library.zip.gruvgold-backup") {
+        Say 'YASB keeps the rice''s patches (harmless with a stock config). To restore stock YASB, in an ADMIN PowerShell run:' 'DarkYellow'
+        Say "  powershell -NoProfile -ExecutionPolicy Bypass -File `"$(Join-Path (Split-Path $PSScriptRoot -Parent) 'yasb\patch-yasb.ps1')`" -Restore" 'DarkYellow'
+    }
 }
 
 # ---------------------------------------------------------------- finish
