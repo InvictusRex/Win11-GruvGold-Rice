@@ -129,9 +129,12 @@ public static class PinIcon {
 }
 '@
 
-# Resolve a pin to (exe, source bitmap). Store apps: exe from the package manifest, icon
-# from the package's 256px logo (their exes often carry no usable icon).
-function Resolve-Pin($spec, $exeName) {
+# Resolve a pin to (target, source bitmap). Store apps are pinned as shell:AppsFolder\<AUMID>:
+# the exe inside WindowsApps sits in a versioned folder that every Store update renames, and
+# Windows often refuses to start it directly (Access is denied). The AUMID always launches,
+# but Nexus cannot match it to a window, so a running Store app shows no indicator dot.
+# Icon from the package's 256px logo (their exes often carry no usable icon).
+function Resolve-Pin($spec) {
     if ($spec -notmatch '!') {
         if (-not (Test-Path $spec)) { throw "not found: $spec" }
         return @{ Exe = $spec; Bmp = [PinIcon]::FromExe($spec) }
@@ -143,28 +146,21 @@ function Resolve-Pin($spec, $exeName) {
     $stem = Join-Path $pkg.InstallLocation ([IO.Path]::ChangeExtension($app.VisualElements.Square44x44Logo, $null).TrimEnd('.'))
     $png = "$stem.targetsize-256.png", "$stem.targetsize-256_altform-unplated.png", "$stem.scale-400.png" |
         Where-Object { Test-Path $_ } | Select-Object -First 1
-    if (-not $exeName) { $exeName = $app.Executable }
-    $exe = if ([IO.Path]::IsPathRooted($exeName)) { $exeName } else { Join-Path $pkg.InstallLocation $exeName }
-    @{ Exe = $exe; Bmp = New-Object System.Drawing.Bitmap $png }
+    @{ Exe = "shell:AppsFolder\$spec"; Bmp = New-Object System.Drawing.Bitmap $png }
 }
 
-# Pinned apps: name, exe path or AUMID, optional exe override when the manifest's exe is only
-# a launcher stub (Spotify). The pin points at the package exe so Nexus can match the running
-# window to it and launch the app. Spotify is the exception: its manifest exe (a migrator)
-# is not the exe that runs, and Windows refuses to start Spotify.exe from inside WindowsApps,
-# so it pins the app-execution alias instead. That launches, but a running Spotify then
-# shows no indicator dot on its icon.
+# Pinned apps: name, then exe path or AUMID.
 $pinSpecs = @(
     @('Terminal',      'Microsoft.WindowsTerminal_8wekyb3d8bbwe!App'),
     @('Obsidian',      "$env:LOCALAPPDATA\Programs\Obsidian\Obsidian.exe"),
     @('PredatorSense', 'ULICTekInc.PredatorSenseforNotebook_nt9dgb7efx6bt!PredatorSense'),
     @('File Explorer', "$env:windir\explorer.exe"),
-    @('Spotify',       'SpotifyAB.SpotifyMusic_zpdnekdrzrea0!Spotify', "$env:LOCALAPPDATA\Microsoft\WindowsApps\Spotify.exe"),
+    @('Spotify',       'SpotifyAB.SpotifyMusic_zpdnekdrzrea0!Spotify'),
     @('WhatsApp',      '5319275A.WhatsAppDesktop_cv1g1gvanyjgm!App')
 )
 $items = foreach ($p in $pinSpecs) {
     # An app that is not installed on this machine is left off the dock rather than failing the run.
-    try { $r = Resolve-Pin $p[1] $p[2] }
+    try { $r = Resolve-Pin $p[1] }
     catch { Write-Warning "skipping pin '$($p[0])': $($_.Exception.Message)"; continue }
     $icoPath = "$assets\pins\$($p[0]).ico"
     [IO.File]::WriteAllBytes($icoPath, [PinIcon]::ToPinIco($r.Bmp))

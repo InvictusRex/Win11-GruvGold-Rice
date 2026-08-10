@@ -112,15 +112,16 @@ The bottom of the screen is two separate pieces:
 - **Apps dock** - Nexus, centred, auto-hiding, floating 10px off the edge. It slides in and
   out with no overshoot, and stays above other windows without taking focus from them: the
   AutoHotkey script keeps it topmost and hands focus back the moment the pointer leaves it.
-  Pins point at each app's real exe so running windows merge into their icon (a dot under
-  it) instead of appearing separately; only pinned apps are shown. Spotify is the exception:
-  Windows refuses to start it from inside `WindowsApps`, so it pins its launch alias and
-  shows no dot while running. Icons are generated from each app's own icon, graded to
-  gruvbox-dark on a `#1d2021` tile; the dock logo is `nexus/logo.png`.
-  `configure-nexus.ps1` (run from Windows PowerShell 5.1, not pwsh 7) writes all of it into
-  Nexus' registry key. Store apps keep their version in the install path, so re-run it after
-  such an app updates. The pin list is `pinSpecs` at the top of that script, and an app that
-  is not installed on the machine is skipped, so edit it to match your own apps.
+  Desktop apps are pinned by their exe, so running windows merge into their icon (a dot
+  under it) instead of appearing separately; only pinned apps are shown. Store apps are
+  pinned as `shell:AppsFolder\<AUMID>`: their exe sits in a versioned `WindowsApps` folder
+  that each update renames, and Windows often refuses to start it directly, so this is the
+  only target that keeps launching. Nexus cannot tie a running Store app to that pin, so
+  those show no dot. Icons are generated from each app's own icon, graded to gruvbox-dark
+  on a `#1d2021` tile; the dock logo is `nexus/logo.png`. `configure-nexus.ps1` (run from
+  Windows PowerShell 5.1, not pwsh 7) writes all of it into Nexus' registry key. The pin
+  list is `pinSpecs` at the top of that script, and an app that is not installed on the
+  machine is skipped, so edit it to match your own apps.
 - **Tray pill** - the **native taskbar** (so the tray, bell and Quick Settings still work),
   with every button hidden and the tray frame styled as a `#0D0C09`/82% pill by Windhawk's
   *Windows 11 Taskbar Styler*. Install that mod from Windhawk's window, then run
