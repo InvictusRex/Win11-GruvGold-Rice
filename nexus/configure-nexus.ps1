@@ -156,7 +156,6 @@ function Resolve-Pin($spec, $exeName) {
 # shows no indicator dot on its icon.
 $pinSpecs = @(
     @('Terminal',      'Microsoft.WindowsTerminal_8wekyb3d8bbwe!App'),
-    @('Claude',        'Claude_pzs8sxrjxfjjc!Claude'),
     @('Obsidian',      "$env:LOCALAPPDATA\Programs\Obsidian\Obsidian.exe"),
     @('PredatorSense', 'ULICTekInc.PredatorSenseforNotebook_nt9dgb7efx6bt!PredatorSense'),
     @('File Explorer', "$env:windir\explorer.exe"),
