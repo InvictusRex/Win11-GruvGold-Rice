@@ -323,8 +323,9 @@ global keyboard/mouse hooks (whkd, masir) are what behavioural checks look for.
 - Stops everything the rice runs.
 - Disables autostart by renaming the Startup shortcut, so a reboot mid-exam doesn't bring
   the rice back.
-- Asks Windhawk to exit, which unloads its Explorer mods. Windhawk normally runs elevated, so
-  a non-elevated shell cannot reach it; it is then reported, and you quit it from the tray.
+- Exits Windhawk, which unloads its Explorer mods, and disables its service so it stays off
+  across reboots. Windhawk runs elevated, so this step asks for one UAC prompt; `-Off`
+  re-enables the service and brings the tray icon back.
 - Checks that nothing is left running and names anything that is. The Everything
   *service* is ignored: it runs in session 0, draws no window and has no hooks.
 

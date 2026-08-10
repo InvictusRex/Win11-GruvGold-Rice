@@ -40,6 +40,17 @@ function Invoke-Start([string]$argLine, [switch]$Wait) {
     if ($Wait) { Start-Process @p -Wait } else { Start-Process @p }
 }
 
+# Windhawk runs as a LocalSystem service that relaunches its elevated tray on every
+# boot, so stopping or re-enabling it needs admin: one UAC prompt for just that step.
+function Invoke-Elevated([string]$cmd, [string]$done, [switch]$Wait) {
+    $enc = [Convert]::ToBase64String([Text.Encoding]::Unicode.GetBytes($cmd))
+    $p = @{ FilePath = $pwsh; ArgumentList = "-NoProfile -ExecutionPolicy Bypass -EncodedCommand $enc"; Verb = 'RunAs'; WindowStyle = 'Hidden'; ErrorAction = 'Stop' }
+    try {
+        if ($Wait) { Start-Process @p -Wait } else { Start-Process @p }
+        Say $done 'Green'
+    } catch { Say 'UAC prompt declined - Windhawk left as-is' 'Red' }
+}
+
 if ($Off) {
     Write-Host "`nLeaving exam mode" -ForegroundColor Yellow
 
@@ -52,7 +63,11 @@ if ($Off) {
 
     Invoke-Start ''
     Say 'rice restarting now' 'Green'
-    if ($windhawk -and -not (Get-Process windhawk -ErrorAction SilentlyContinue)) { Start-Process $windhawk -ArgumentList '-tray-only'; Say 'Windhawk restarting' 'Green' }
+    $svc = Get-Service Windhawk -ErrorAction SilentlyContinue
+    if ($svc -and ($svc.StartType -eq 'Disabled' -or $svc.Status -ne 'Running')) {
+        # Starting the service mid-session may not bring the tray up on its own, so launch it if missing.
+        Invoke-Elevated "Set-Service Windhawk -StartupType Automatic; Start-Service Windhawk; Start-Sleep 2; if (-not (Get-Process windhawk -EA 0 | ? SessionId -ne 0)) { & '$windhawk' -tray-only }" 'Windhawk re-enabled and restarting'
+    }
     Write-Host ""
     exit 0
 }
@@ -63,9 +78,9 @@ Invoke-Start '-Stop' -Wait
 Say 'rice stopped (komorebi restored your windows cleanly)' 'Green'
 
 # Windhawk injects into explorer.exe; -exit unloads its mods. Proctoring tools flag injection.
-if ($windhawk) {
-    Start-Process $windhawk -ArgumentList '-exit', '-wait' -Wait -ErrorAction SilentlyContinue
-    # Windhawk normally runs elevated, which a non-elevated -exit cannot reach; the check below reports it.
+# Disabling the service is what keeps it from coming back on reboot.
+if (Get-Service Windhawk -ErrorAction SilentlyContinue) {
+    Invoke-Elevated "& '$windhawk' -exit -wait; Set-Service Windhawk -StartupType Disabled; Stop-Service Windhawk -Force -EA 0; Get-Process windhawk -EA 0 | Stop-Process -Force" 'Windhawk stopped and its service disabled' -Wait
 }
 
 if (Test-Path $lnk) {
