@@ -1,5 +1,5 @@
 diff --git a/explorer-font-changer.wh.cpp b/explorer-font-changer.wh.cpp
-index ba5df5e..5591164 100644
+index ba5df5e..6c1a8f7 100644
 --- a/explorer-font-changer.wh.cpp
 +++ b/explorer-font-changer.wh.cpp
 @@ -69,6 +69,9 @@ This can be checked by others by going to System Informer, looking for `explorer
@@ -12,15 +12,42 @@ index ba5df5e..5591164 100644
    $name: Custom font
    $description: This font will be used for all font creation in Windows.
  */
-@@ -90,6 +93,7 @@ namespace util {
+@@ -90,33 +93,7 @@ namespace util {
      int s_glow_b = 255;
      int s_glow_a = 255;
      int s_glow_intensity = 0;
+-
+-    // Class to declare transparent RAII types.
+-    template <class T, auto Fn>
+-    class raii {
+-    public:
+-        raii() = delete;
+-        raii(T handle) : m_handle(handle) {}
+-        ~raii() {
+-            Fn(m_handle);
+-        }
+-
+-        // we don't need operator= or raii(raii&&) yet...
+-
+-        auto& get() {
+-            return m_handle;
+-        }
+-        
+-        auto get() const {
+-            return m_handle;
+-        }
+-
+-    private:
+-        T m_handle;
+-    };
+-
+-    // RAII `HFONT`.
+-    using unique_hfont_t = raii<HFONT, DeleteObject>;
 +    int s_scale = 100;
  
-     // Class to declare transparent RAII types.
-     template <class T, auto Fn>
-@@ -205,6 +209,10 @@ namespace util {
+     // Alters search path to look in `System32` folder.
+     HMODULE load_os_library(
+@@ -205,6 +182,10 @@ namespace util {
      ) {
          auto font_name = std::wstring_view(s_font_name.get());
  
@@ -31,7 +58,65 @@ index ba5df5e..5591164 100644
          // Check font configuration.
          if (font_name != L"None"sv) {
              if (font_name.size() <= 31) {
-@@ -258,6 +266,8 @@ namespace util {
+@@ -222,33 +203,31 @@ namespace util {
+         }
+     }
+ 
+-    std::pair<unique_hfont_t, LOGFONTW> hdc_update_font(
+-        HDC hdc
+-    ) {
+-        // Get current selected font.
+-        auto h_font = GetCurrentObject(hdc, OBJ_FONT);
+-
+-        // Create struct for font.
+-        auto font = LOGFONTW { 0 };
+-
+-        // Get `LOGFONTW` from font handle.
+-        GetObjectW(
+-            static_cast<HANDLE>(h_font),
+-            sizeof(font),
+-            static_cast<LPVOID>(&font)
+-        );
+-
+-        // Change font to the font specified in settings.
+-        change_font_in_struct(&font);
+-
+-        // Create new font.
+-        auto h_new_font = CreateFontIndirectW(&font);
+-
+-        // Select font.
+-        SelectObject(hdc, h_new_font);
++    // Selects the settings font into `hdc` for one draw call, then puts the caller's font
++    // back. Left selected, the next DrawText on the same DC would read the already-scaled
++    // font and scale it again (multi-line tooltips grew line by line), and the font would
++    // be deleted while still selected.
++    class scoped_font {
++    public:
++        explicit scoped_font(HDC hdc) : m_hdc(hdc) {
++            auto font = LOGFONTW { 0 };
++            GetObjectW(GetCurrentObject(hdc, OBJ_FONT), sizeof(font), &font);
++            change_font_in_struct(&font);
++            m_font = CreateFontIndirectW(&font);
++            m_old = SelectObject(hdc, m_font);
++        }
++        ~scoped_font() {
++            SelectObject(m_hdc, m_old);
++            DeleteObject(m_font);
++        }
++        scoped_font(const scoped_font&) = delete;
++        scoped_font& operator=(const scoped_font&) = delete;
+ 
+-        return { h_new_font, font };
+-    }
++    private:
++        HDC m_hdc;
++        HFONT m_font;
++        HGDIOBJ m_old;
++    };
+ 
+     void update_settings() {
+         s_font_name      = StringSetting::make(L"font.name");
+@@ -258,6 +237,8 @@ namespace util {
          s_glow_b         = Wh_GetIntSetting(L"font.b");
          s_glow_a         = Wh_GetIntSetting(L"font.a");
          s_glow_intensity = Wh_GetIntSetting(L"font.intensity");
@@ -40,3 +125,23 @@ index ba5df5e..5591164 100644
      }
  
      bool is_glow_enabled() {
+@@ -321,8 +302,7 @@ INT WINAPI draw_textw_hook(
+     LPRECT lprc,
+     UINT format
+ ) {
+-    // Update font on HDC to settings font, from current HFONT.
+-    auto [h_new_font, _] = util::hdc_update_font(hdc);
++    util::scoped_font font(hdc);
+ 
+     if (format & DT_CALCRECT) {
+         return draw_textw_original(hdc, lpchText, cchText, lprc, format);;
+@@ -353,8 +333,7 @@ INT WINAPI draw_text_exw_hook(
+     UINT format,
+     LPDRAWTEXTPARAMS lpdtp
+ ) {
+-    // Update font on HDC to settings font, from current HFONT.
+-    auto [h_new_font, _] = util::hdc_update_font(hdc);
++    util::scoped_font font(hdc);
+ 
+     if (format & DT_CALCRECT) {
+         return draw_text_exw_original(hdc, lpchText, cchText, lprc, format, lpdtp);

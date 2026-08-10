@@ -526,7 +526,9 @@ after `install.ps1`:
 3. Install **Windows 11 File Explorer Styler**: theme `Translucent Explorer11`, translucent
    background effect `None`, plus the control styles in `windhawk/file-explorer-styler.json`.
 4. Install **Explorer Font Changer**, apply `windhawk/explorer-font-changer.patch` (adds a
-   *Font size scale* setting), compile, and use `windhawk/explorer-font-changer.json`.
+   *Font size scale* setting, and restores each caller's font after drawing so multi-line
+   tooltips such as folder infotips no longer grow line by line), compile, and use
+   `windhawk/explorer-font-changer.json`.
 5. Install **Windows 11 Taskbar Styler** (the tray pill, see [Components](#components)), then
    run `windhawk/apply-taskbar-styler.ps1` from an elevated PowerShell. Leave the mod's
    XAML diagnostics handling on *block* so no other tool competes for Explorer's one slot.
