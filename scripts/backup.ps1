@@ -74,6 +74,7 @@ $keys = @(
     'HKCU\Software\WinSTEP2000'
     'HKCU\Control Panel\Desktop'
     'HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Accent'
+    'HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\StuckRects3'
 )
 foreach ($k in $keys) {
     $safe = ($k -replace '[\\\s]', '_')
