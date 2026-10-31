@@ -21,13 +21,16 @@
       -SkipConfigs    only change Windows settings
       -Name <name>    name shown in the prompt and fastfetch title (default: your
                       Windows user name). Remembered for later runs.
+      -NeutralWallpaper  use theme\wallpaper.png instead of the warm-tinted
+                      wallpaper-warm.png, for screens that keep Night Light on
 #>
 
 [CmdletBinding()]
 param(
     [switch]$SkipSettings,
     [switch]$SkipConfigs,
-    [string]$Name
+    [string]$Name,
+    [switch]$NeutralWallpaper
 )
 
 $ErrorActionPreference = 'Continue'
@@ -564,9 +567,13 @@ if (-not $SkipSettings) {
     Head 'Windows settings'
 
     # ---- wallpaper -------------------------------------------------------
+    # The rice is tuned under Windows Night Light. wallpaper-warm.png is wallpaper.png with
+    # Night Light's default tint (strength 48, about 3950 K) baked in, so it looks as intended
+    # without Night Light; on a screen that keeps Night Light on it would be tinted twice.
     # From the installed copy: the lock screen reads the file by path.
-    $wall = "$live\theme\wallpaper.png"
-    Deploy (Join-Path $repo 'theme\wallpaper.png') $wall
+    $wallName = if ($NeutralWallpaper) { 'wallpaper.png' } else { 'wallpaper-warm.png' }
+    $wall = "$live\theme\$wallName"
+    Deploy (Join-Path $repo "theme\$wallName") $wall
     if (Test-Path $wall) {
         Add-Type @'
 using System.Runtime.InteropServices;
@@ -578,8 +585,8 @@ public class GruvWallpaper {
         Set-ItemProperty 'HKCU:\Control Panel\Desktop' -Name WallpaperStyle -Value '10'  # fill
         Set-ItemProperty 'HKCU:\Control Panel\Desktop' -Name TileWallpaper  -Value '0'
         [GruvWallpaper]::SystemParametersInfo(20, 0, $wall, 3) | Out-Null   # SPI_SETDESKWALLPAPER
-        Say "wallpaper set" 'Green'
-    } else { Say "wallpaper.png not found" 'Red' }
+        Say "wallpaper set ($wallName)" 'Green'
+    } else { Say "$wallName not found" 'Red' }
 
     # ---- dark mode + gold accent ----------------------------------------
     $pers = 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Themes\Personalize'
@@ -613,6 +620,16 @@ public class GruvWallpaper {
     New-ItemProperty $adv -Name TaskbarGlomLevel   -Value 2 -PropertyType DWord -Force | Out-Null
     New-ItemProperty $adv -Name MMTaskbarGlomLevel -Value 2 -PropertyType DWord -Force | Out-Null
     Say "taskbar centred, labels always shown" 'Green'
+    # Auto-hide, so the tray pill only appears from the bottom-right corner (desktop-type-to-launch.ahk
+    # keeps the pointer off the rest of the edge). It is bit 0 of byte 8 in StuckRects3\Settings;
+    # Explorer reads it at start and is restarted below.
+    $stuck = 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\StuckRects3'
+    $sr = (Get-ItemProperty $stuck -Name Settings -ErrorAction SilentlyContinue).Settings
+    if ($sr) {
+        $sr[8] = $sr[8] -bor 1
+        Set-ItemProperty $stuck -Name Settings -Value $sr
+        Say "taskbar auto-hide on" 'Green'
+    } else { Say "taskbar auto-hide: StuckRects3 not found - turn it on in Settings > Personalization > Taskbar" 'DarkYellow' }
     # Explorer still runs its own Win+D alongside the whkd binding and hides the windows
     # before toggle-desktop.ahk can enumerate them. Needs an Explorer restart to apply.
     $hot = (Get-ItemProperty $adv -Name DisabledHotkeys -ErrorAction SilentlyContinue).DisabledHotkeys
