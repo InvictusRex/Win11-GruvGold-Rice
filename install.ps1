@@ -29,8 +29,8 @@ $packages = [ordered]@{
     'Fastfetch-cli.Fastfetch'       = 'fastfetch (terminal greeting)'
     'LGUG2Z.komorebi'               = 'komorebi tiling WM'
     'LGUG2Z.whkd'                   = 'whkd hotkey daemon'
-    'LGUG2Z.masir'                  = 'masir (focus-follows-mouse for komorebi)'
-    'RamenSoftware.Windhawk'        = 'Windhawk (Explorer translucency, lock-screen clock font)'
+    'LGUG2Z.masir'                  = 'masir (hover-to-focus)'
+    'RamenSoftware.Windhawk'        = 'Windhawk (Explorer mods, tray pill)'
 }
 
 # Pinned: yasb\patch-yasb.ps1 swaps in whole modules from this exact YASB release.
