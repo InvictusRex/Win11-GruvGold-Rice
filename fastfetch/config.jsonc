@@ -24,7 +24,9 @@
     "uptime",
     "terminal",
     "cpu",
-    "gpu",
+    // Name only: the default line adds clock, VRAM and type, which wraps (and breaks the
+    // logo) in a half-width tiled terminal.
+    { "type": "gpu", "format": "{name}" },
     "memory",
     "swap",
     // apply.ps1 fills in this machine's local drives. Auto-detection also probes
