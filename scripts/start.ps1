@@ -191,12 +191,11 @@ if (-not $NoTiling) {
 } else { Say 'komorebi skipped (-NoTiling)' 'DarkGray' }
 
 # Rainmeter loads its skins from its own config; activate ours explicitly so a
-# fresh install shows them without the user touching the Rainmeter UI.
+# fresh install shows the clock without the user touching the Rainmeter UI.
 if ($bin.rainmeter) {
     Start-Sleep -Milliseconds 800
     & $bin.rainmeter '!ActivateConfig' 'GruvGold\Clock' 'Clock.ini' 2>&1 | Out-Null
-    & $bin.rainmeter '!ActivateConfig' 'GruvGold\Visualizer' 'Visualizer.ini' 2>&1 | Out-Null
-    Say 'Rainmeter skins activated' 'Green'
+    Say 'Rainmeter clock activated' 'Green'
 }
 
 # ================================================================= autostart
